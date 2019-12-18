@@ -15,11 +15,11 @@ export default {
 
   components: {
 
-    'appHeader': Header
+    'appHeader': Header,
   },
 
   data: () => ({
     //
-  })
+  }),
 }
 </script>
