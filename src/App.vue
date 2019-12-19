@@ -15,11 +15,11 @@ export default {
 
   components: {
     appHeader: Header,
-    appFooter: Footer,
+    appFooter: Footer
   },
 
   data: () => ({
     //
-  }),
+  })
 }
 </script>
