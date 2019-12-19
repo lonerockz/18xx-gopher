@@ -1,10 +1,10 @@
 <template>
-    <div>
-        playerlist
-<ul>
-    <li></li>
-</ul>
-    </div>
+  <div>
+    playerlist
+    <ul>
+      <li />
+    </ul>
+  </div>
 </template>
 
 <script>

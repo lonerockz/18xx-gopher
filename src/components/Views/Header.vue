@@ -1,40 +1,86 @@
 <template>
-    <div>
-    <v-app-bar
-      app
-      color="primary"
-      dark
+  <v-card>
+    <v-toolbar
+      flat
+      fixed
     >
-      <div class="d-flex align-center">
-        <v-img
-          alt="Vuetify Logo"
-          class="shrink mr-2"
-          contain
-          src="https://cdn.vuetifyjs.com/images/logos/vuetify-logo-dark.png"
-          transition="scale-transition"
-          width="40"
-        />
+      <v-app-bar-nav-icon />
+      <v-toolbar-title>Contact Database</v-toolbar-title>
+      <v-spacer />
 
-        18xx Gopher
-      </div>
-
-      <v-spacer></v-spacer>
-
-      <v-btn
-        href="https://github.com/vuetifyjs/vuetify/releases/latest"
-        target="_blank"
-        text
-      >
-        <span class="mr-2">Latest Release</span>
-        <v-icon>mdi-open-in-new</v-icon>
+      <v-btn icon>
+        <v-icon>mdi-magnify</v-icon>
       </v-btn>
-    </v-app-bar>
-    </div>
+
+      <v-btn icon>
+        <v-icon>mdi-dots-vertical</v-icon>
+      </v-btn>
+
+      <template v-slot:extension>
+        <v-tabs
+          v-model="tabs"
+          fixed-tabs
+        >
+          <v-tabs-slider />
+          <v-tab
+            href="#mobile-tabs-5-1"
+            class="primary--text"
+          >
+            <v-icon>mdi-phone</v-icon>
+          </v-tab>
+
+          <v-tab
+            href="#mobile-tabs-5-2"
+            class="primary--text"
+          >
+            <v-icon>mdi-heart</v-icon>
+          </v-tab>
+
+          <v-tab
+            href="#mobile-tabs-5-3"
+            class="primary--text"
+          >
+            <v-icon>mdi-account-box</v-icon>
+          </v-tab>
+        </v-tabs>
+      </template>
+    </v-toolbar>
+
+    <v-tabs-items v-model="tabs">
+      <v-tab-item
+        v-for="i in 3"
+        :key="i"
+        :value="'mobile-tabs-5-' + i"
+      >
+        <v-card flat>
+          <v-card-text v-text="text" />
+        </v-card>
+      </v-tab-item>
+    </v-tabs-items>
+  </v-card>
 </template>
 
 <script>
+// import NavMenu from './NavMenu.vue'
+
 export default {
 
+  components: {
+    // appNavMenu: NavMenu,
+  },
+  data() {
+    return {
+      drawer: true,
+      items: [
+        { title: 'Dashboard', icon: 'mdi-view-dashboard' },
+        { title: 'Photos', icon: 'mdi-image' },
+        { title: 'About', icon: 'mdi-help-box' },
+      ],
+      tabs: null,
+      text: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. It necessary to declare properties with their initial values in state. For the RTDB, using an Array as the initial value will bind the Reference as an array, otherwise it is bound as an object. For Firestore, collections and queries are bound as arrays while documents are bound as objects.',
+      right: null,
+    }
+  },
 }
 </script>
 

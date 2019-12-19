@@ -1,7 +1,7 @@
 <template>
-    <div>
+  <div>
     Player Info
-    </div>
+  </div>
 </template>
 
 <script>

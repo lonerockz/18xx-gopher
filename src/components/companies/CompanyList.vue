@@ -1,10 +1,10 @@
 <template>
-    <div>
-        company list
-        <ul>
-            <li></li>
-        </ul>
-    </div>
+  <div>
+    company list
+    <ul>
+      <li />
+    </ul>
+  </div>
 </template>
 
 <script>

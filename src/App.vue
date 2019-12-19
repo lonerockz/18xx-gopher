@@ -1,21 +1,21 @@
 <template>
   <v-app>
-    <v-content>
-      <app-header></app-header>
-
-    </v-content>
+    <app-header />
+    <v-content />
+    <app-footer />
   </v-app>
 </template>
 
 <script>
 import Header from './components/Views/Header'
+import Footer from './components/Views/Footer'
 
 export default {
   name: 'App',
 
   components: {
-
-    'appHeader': Header,
+    appHeader: Header,
+    appFooter: Footer,
   },
 
   data: () => ({

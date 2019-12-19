@@ -1,7 +1,7 @@
 <template>
-    <div>
-  login view
-    </div>
+  <div>
+    login view
+  </div>
 </template>
 
 <script>

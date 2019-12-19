@@ -1,7 +1,7 @@
 <template>
-    <div>
-Settings view
-    </div>
+  <div>
+    Settings view
+  </div>
 </template>
 
 <script>
