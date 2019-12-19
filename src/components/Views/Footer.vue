@@ -24,11 +24,11 @@
 
 <script>
 export default {
-  data() {
+  data () {
     return {
-      bottomNav: 'recent',
+      bottomNav: 'recent'
     }
-  },
+  }
 }
 </script>
 
