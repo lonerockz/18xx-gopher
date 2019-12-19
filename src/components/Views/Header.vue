@@ -26,21 +26,16 @@
             href="#mobile-tabs-5-1"
             class="primary--text"
           >
-            <v-icon>mdi-phone</v-icon>
+            Players
+            <v-icon>mdi-account-group</v-icon>
           </v-tab>
 
           <v-tab
             href="#mobile-tabs-5-2"
             class="primary--text"
           >
-            <v-icon>mdi-heart</v-icon>
-          </v-tab>
-
-          <v-tab
-            href="#mobile-tabs-5-3"
-            class="primary--text"
-          >
-            <v-icon>mdi-account-box</v-icon>
+            Companies
+            <v-icon>mdi-train-variant</v-icon>
           </v-tab>
         </v-tabs>
       </template>
@@ -58,11 +53,11 @@
       </v-tab-item>
     </v-tabs-items>
     <div
-      v-for="(game) in gameTemplates"
+      v-for="(game) in activeGamePlayers"
       :key="game.id"
     >
       <v-card>
-        <v-card-text v-text="game.name" />
+        <v-card-text v-text="game.id" />
       </v-card>
     </div>
   </v-card>
@@ -70,7 +65,7 @@
 
 <script>
 // import NavMenu from './NavMenu.vue'
-import { mapGetters } from 'vuex'
+import { mapGetters, mapActions } from 'vuex'
 
 export default {
 
@@ -78,7 +73,13 @@ export default {
     // appNavMenu: NavMenu,
   },
   computed: {
-    ...mapGetters(['games', 'gameTemplates'])
+    ...mapGetters(['games', 'gameTemplates', 'activeGamePlayers'])
+  },
+  methods: {
+    ...mapActions(['bindActiveGamePlayers'])
+  },
+  beforeCreate () {
+    this.$store.dispatch('bindActiveGamePlayers')
   },
   data () {
     return {
