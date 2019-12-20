@@ -40,55 +40,31 @@
         </v-tabs>
       </template>
     </v-toolbar>
-
     <v-tabs-items v-model="tabs">
-      <v-tab-item
-        key="players-1"
-        value="mobile-tabs-5-1"
-      >
-        <v-expansion-panels>
-          <v-expansion-panel
-            v-for="(player) in activeGamePlayers"
-            :key="player.id"
-          >
-            <v-expansion-panel-header>{{ player.player.name }}</v-expansion-panel-header>
-            <v-expansion-panel-content>
-              {{ player.currentCash }}
-            </v-expansion-panel-content>
-          </v-expansion-panel>
-        </v-expansion-panels>
-      </v-tab-item>
-      <v-tab-item
-        key="companies-2"
-        value="mobile-tabs-5-2"
-      >
-        <div
-          v-for="(company) in activeGameCompanies"
-          :key="company.id"
-        >
-          <v-card>
-            <v-card-text v-text="company" />
-          </v-card>
-        </div>
-      </v-tab-item>
+      <app-player-list />
+      <app-company-list />
     </v-tabs-items>
   </v-card>
 </template>
 
 <script>
 // import NavMenu from './NavMenu.vue'
+import PlayerList from '../players/Playerlist.vue'
+import CompanyList from '../companies/CompanyList.vue'
 import { mapGetters, mapActions } from 'vuex'
 
 export default {
 
   components: {
     // appNavMenu: NavMenu,
+    appPlayerList: PlayerList,
+    appCompanyList: CompanyList
   },
   computed: {
-    ...mapGetters(['activeGame', 'activeGamePlayers', 'activeGameCompanies'])
+    ...mapGetters(['activeGame'])
   },
   methods: {
-    ...mapActions(['bindActiveGame', 'bindActiveGamePlayers', 'bindActiveGameCompanies'])
+    ...mapActions(['bindActiveGame'])
   },
   beforeCreate () {
     this.$store.dispatch('bindActiveGame')
@@ -96,9 +72,7 @@ export default {
     this.$store.dispatch('bindActiveGameCompanies')
   },
   created () {
-    // console.log(this.games)
-    // console.log('--- Players ---')
-    // console.log(this.activeGame)
+
   },
 
   data () {
