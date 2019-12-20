@@ -43,23 +43,35 @@
 
     <v-tabs-items v-model="tabs">
       <v-tab-item
-        v-for="i in 3"
-        :key="i"
-        :value="'mobile-tabs-5-' + i"
+        key="players-1"
+        value="mobile-tabs-5-1"
       >
-        <v-card flat>
-          <v-card-text v-text="text" />
-        </v-card>
+        <v-expansion-panels>
+          <v-expansion-panel
+            v-for="(player) in activeGamePlayers"
+            :key="player.id"
+          >
+            <v-expansion-panel-header>{{ player.player.name }}</v-expansion-panel-header>
+            <v-expansion-panel-content>
+              {{ player.currentCash }}
+            </v-expansion-panel-content>
+          </v-expansion-panel>
+        </v-expansion-panels>
+      </v-tab-item>
+      <v-tab-item
+        key="companies-2"
+        value="mobile-tabs-5-2"
+      >
+        <div
+          v-for="(company) in activeGameCompanies"
+          :key="company.id"
+        >
+          <v-card>
+            <v-card-text v-text="company" />
+          </v-card>
+        </div>
       </v-tab-item>
     </v-tabs-items>
-    <div
-      v-for="(game) in activeGamePlayers"
-      :key="game.id"
-    >
-      <v-card>
-        <v-card-text v-text="game.id" />
-      </v-card>
-    </div>
   </v-card>
 </template>
 
@@ -73,14 +85,22 @@ export default {
     // appNavMenu: NavMenu,
   },
   computed: {
-    ...mapGetters(['games', 'gameTemplates', 'activeGamePlayers'])
+    ...mapGetters(['activeGame', 'activeGamePlayers', 'activeGameCompanies'])
   },
   methods: {
-    ...mapActions(['bindActiveGamePlayers'])
+    ...mapActions(['bindActiveGame', 'bindActiveGamePlayers', 'bindActiveGameCompanies'])
   },
   beforeCreate () {
+    this.$store.dispatch('bindActiveGame')
     this.$store.dispatch('bindActiveGamePlayers')
+    this.$store.dispatch('bindActiveGameCompanies')
   },
+  created () {
+    // console.log(this.games)
+    // console.log('--- Players ---')
+    // console.log(this.activeGame)
+  },
+
   data () {
     return {
       drawer: true,

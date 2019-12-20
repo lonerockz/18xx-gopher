@@ -16,12 +16,15 @@ export default new Vuex.Store({
     gameTemplates: [],
     players: [],
     activeGame: {},
-    activeGamePlayers: []
+    activeGamePlayers: [],
+    activeGameCompanies: []
   },
   getters: {
     games: state => state.games,
     gameTemplates: state => state.gameTemplates,
-    activeGamePlayers: state => state.activeGamePlayers
+    activeGamePlayers: state => state.activeGamePlayers,
+    activeGame: state => state.activeGame,
+    activeGameCompanies: state => state.activeGameCompanies
   },
   mutations: { ...vuexfireMutations },
 
@@ -33,12 +36,15 @@ export default new Vuex.Store({
       return bindFirestoreRef('gameTemplates', db.collection('gameTemplates'))
     }),
     bindActiveGamePlayers: firestoreAction(({ bindFirestoreRef }) => {
-      return bindFirestoreRef('activeGamePlayers', db.collection('players').doc('pUYZlRukPEuB8LgFmhb5'))
-      // return bindFirestoreRef('activeGamePlayers', db.collection('players').where('id', 'in', ['pUYZlRukPEuB8LgFmhb5', 'acHpmffMOspxdMYfOcKf']))
+      return bindFirestoreRef('activeGamePlayers', db.collection('games').doc('SXkOIfauym3VxeRH6djV').collection('players'))
     }),
+    bindActiveGameCompanies: firestoreAction(({ bindFirestoreRef }) => {
+      return bindFirestoreRef('activeGameCompanies', db.collection('games').doc('SXkOIfauym3VxeRH6djV').collection('companies'))
+    }),
+
     bindActiveGame: firestoreAction(({ bindFirestoreRef }) => {
-      return bindFirestoreRef('activeGame', db.collection('games').doc('SXkOIfauym3VxeRH6djV'))
-      // return bindFirestoreRef('activeGamePlayers', db.collection('players').where('id', 'in', ['pUYZlRukPEuB8LgFmhb5', 'acHpmffMOspxdMYfOcKf']))
+      const activeGame = bindFirestoreRef('activeGame', db.collection('games').doc('SXkOIfauym3VxeRH6djV'))
+      return activeGame
     })
   },
   modules: {
