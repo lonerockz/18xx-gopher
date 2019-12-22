@@ -4,20 +4,19 @@
       fixed
       v-model="bottomNav"
     >
-      <v-btn value="recent">
-        <span>Recent</span>
-        <v-icon>mdi-history</v-icon>
-      </v-btn>
-
-      <v-btn value="favorites">
-        <span>Favorites</span>
-        <v-icon>mdi-heart</v-icon>
-      </v-btn>
-
-      <v-btn value="nearby">
-        <span>Nearby</span>
-        <v-icon>mdi-map-marker</v-icon>
-      </v-btn>
+      <v-row>
+        <v-col cols="2">
+          <v-btn value="recent">
+            <v-icon>mdi-history</v-icon>
+          </v-btn>
+        </v-col>
+        <v-col
+          cols="10"
+          class="caption red--text"
+        >
+          Fred Simpson Buys 1 share of the New York Central for $67
+        </v-col>
+      </v-row>
     </v-bottom-navigation>
   </div>
 </template>

@@ -18,7 +18,8 @@ export default new Vuex.Store({
     activeGame: {},
     activeGamePlayers: [],
     activeGameCompanies: [],
-    allGameCompanies: []
+    allGameCompanies: [],
+    navDrawer: true
   },
   getters: {
     games: state => state.games,
@@ -28,9 +29,17 @@ export default new Vuex.Store({
     activeGameCompanies: state => state.activeGameCompanies,
     allGameCompanies: state => state.allGameCompanies
   },
-  mutations: { ...vuexfireMutations },
+  mutations: {
+    ...vuexfireMutations,
+    showNavDrawer: (state) => {
+      state.navDrawer = !state.navDrawer
+    }
+  },
 
   actions: {
+    showNavDrawer: ({ commit }) => {
+      commit('showNavDrawer')
+    },
     bindGames: firestoreAction(({ bindFirestoreRef }) => {
       return bindFirestoreRef('games', db.collection('games'))
     }),

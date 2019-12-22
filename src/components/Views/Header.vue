@@ -4,7 +4,8 @@
       flat
       fixed
     >
-      <v-app-bar-nav-icon />
+      <v-app-bar-nav-icon @click.stop="drawer = !drawer" />
+
       <v-toolbar-title>18xx Gopher</v-toolbar-title>
 
       <v-col class="text-right header font-weight-black">
@@ -42,11 +43,18 @@
       <app-player-list />
       <app-company-list />
     </v-tabs-items>
+    <v-navigation-drawer
+      v-model="drawer"
+      absolute
+      temporary
+    >
+      <app-nav-menu />
+    </v-navigation-drawer>
   </v-card>
 </template>
 
 <script>
-// import NavMenu from './NavMenu.vue'
+import NavMenu from './NavMenu.vue'
 import PlayerList from '../players/Playerlist.vue'
 import CompanyList from '../companies/CompanyList.vue'
 import { mapGetters, mapActions } from 'vuex'
@@ -54,7 +62,7 @@ import { mapGetters, mapActions } from 'vuex'
 export default {
 
   components: {
-    // appNavMenu: NavMenu,
+    appNavMenu: NavMenu,
     appPlayerList: PlayerList,
     appCompanyList: CompanyList
   },
@@ -62,7 +70,7 @@ export default {
     ...mapGetters(['activeGame'])
   },
   methods: {
-    ...mapActions(['bindActiveGame'])
+    ...mapActions(['showNavDrawer'])
   },
   beforeCreate () {
     this.$store.dispatch('bindActiveGame')
@@ -76,8 +84,8 @@ export default {
 
   data () {
     return {
-      drawer: true
-
+      tabs: null,
+      drawer: false
     }
   }
 }
