@@ -6,12 +6,10 @@
     >
       <v-app-bar-nav-icon />
       <v-toolbar-title>18xx Gopher</v-toolbar-title>
-      <v-spacer />
 
-      <v-btn icon>
-        <v-icon>mdi-magnify</v-icon>
-      </v-btn>
-
+      <v-col class="text-right header font-weight-black">
+        Bank: $8538
+      </v-col>
       <v-btn icon>
         <v-icon>mdi-dots-vertical</v-icon>
       </v-btn>
@@ -78,15 +76,8 @@ export default {
 
   data () {
     return {
-      drawer: true,
-      items: [
-        { title: 'Dashboard', icon: 'mdi-view-dashboard' },
-        { title: 'Photos', icon: 'mdi-image' },
-        { title: 'About', icon: 'mdi-help-box' }
-      ],
-      tabs: null,
-      text: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. It necessary to declare properties with their initial values in state. For the RTDB, using an Array as the initial value will bind the Reference as an array, otherwise it is bound as an object. For Firestore, collections and queries are bound as arrays while documents are bound as objects.',
-      right: null
+      drawer: true
+
     }
   }
 }
