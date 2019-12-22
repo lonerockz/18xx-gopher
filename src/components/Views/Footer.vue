@@ -11,7 +11,7 @@
           </v-btn>
         </v-col>
         <v-col
-          cols="10"
+          cols="8"
           class="caption red--text"
         >
           Fred Simpson Buys 1 share of the New York Central for $67

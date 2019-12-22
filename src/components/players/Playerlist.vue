@@ -9,7 +9,7 @@
           v-for="(player) in activeGamePlayers"
           :key="player.id"
         >
-          <v-expansion-panel-header>
+          <v-expansion-panel-header :class="player.player.preferedColor + ' lighten-4'">
             <template v-slot:default="{ open }">
               <v-fade-transition leave-absolute>
                 <v-row
