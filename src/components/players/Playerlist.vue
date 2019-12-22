@@ -17,7 +17,7 @@
                   v-if="open"
                   key="0"
                 >
-                  <v-col>
+                  <v-col class="headline font-weight-black">
                     {{ player.player.name }}
                   </v-col>
                 </v-row>
@@ -51,7 +51,7 @@
             </template>
           </v-expansion-panel-header>
           <v-expansion-panel-content>
-            {{ player }}
+            <app-player-info :player="player" />
           </v-expansion-panel-content>
         </v-expansion-panel>
       </v-expansion-panels>
@@ -61,11 +61,12 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
+import PlayerInfo from './PlayerInfo.vue'
 
 export default {
 
   components: {
-
+    appPlayerInfo: PlayerInfo
   },
   computed: {
     ...mapGetters(['activeGame', 'activeGamePlayers'])
