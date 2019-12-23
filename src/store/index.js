@@ -19,7 +19,8 @@ export default new Vuex.Store({
     activeGamePlayers: [],
     activeGameCompanies: [],
     allGameCompanies: [],
-    navDrawer: true
+    navDrawer: true,
+    currentStockActions: {}
   },
   getters: {
     games: state => state.games,
@@ -70,6 +71,9 @@ export default new Vuex.Store({
     // curGameRef.update({ trainRoster: trainRoster })
     // },
     buyStocks: ({ commit }, payload) => {
+      console.log(payload)
+    },
+    addStockAction: ({ commit }, payload) => {
       console.log(payload)
     }
   },

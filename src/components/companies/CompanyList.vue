@@ -44,12 +44,11 @@
                     cols="2"
                     class="text-center my-auto "
                   >
-                    <v-template
-                      v-for="(train, id) in company.trains"
-                      :key="company.initials + '-trains-' + id"
+                    <template
+                      v-for="(train) in company.trains"
                     >
                       {{ train }}
-                    </v-template>
+                    </template>
                   </v-col>
                   <v-col
                     cols="2"

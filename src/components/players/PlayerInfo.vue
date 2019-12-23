@@ -53,13 +53,7 @@
           >
             Sell
           </v-btn>
-          <v-btn
-            @click="buyStock(player.id)"
-            class="my-1"
-            color="light-green"
-          >
-            Buy
-          </v-btn>
+          <app-buy-stock />
           <v-btn
             class="my-1"
             color="light-green"
@@ -80,12 +74,15 @@
 
 <script>
 import { mapActions } from 'vuex'
+import BuyStock from './BuyStock'
 export default {
+  components: {
+    appBuyStock: BuyStock
+  },
   props: {
+
     player: {
       type: Object,
-      // Object or array defaults must be returned from
-      // a factory function
       default: function () {
         return {
           Player: {
@@ -100,9 +97,9 @@ export default {
   },
   methods: {
     ...mapActions(['buyStocks']),
-    buyStock: function (payload) {
-      // this.$store.dispatch('buyStocks', { payload })
-      console.log(this.player.id)
+    buyStock: function (playerID) {
+      this.$store.dispatch('buyStocks', { playerID })
+      // console.log(this.player.id)
     }
   }
 }
