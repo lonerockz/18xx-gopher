@@ -44,7 +44,9 @@
         cols="4"
         align="center"
       >
-        <v-div class="text-center">
+        <div
+          class="text-center"
+        >
           <v-btn
             class="my-1"
             color="light-green"
@@ -69,7 +71,7 @@
           >
             Commit
           </v-btn>
-        </v-div>
+        </div>
       </v-col>
     </v-row>
   </v-row>
