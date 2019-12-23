@@ -54,6 +54,7 @@
             Sell
           </v-btn>
           <v-btn
+            @click="buyStock(player.id)"
             class="my-1"
             color="light-green"
           >
@@ -78,6 +79,7 @@
 </template>
 
 <script>
+import { mapActions } from 'vuex'
 export default {
   props: {
     player: {
@@ -92,12 +94,19 @@ export default {
             preferedColor: 'black'
           },
           currentCash: -1
-
         }
       }
     }
+  },
+  methods: {
+    ...mapActions(['buyStocks']),
+    buyStock: function (payload) {
+      // this.$store.dispatch('buyStocks', { payload })
+      console.log(this.player.id)
+    }
   }
 }
+
 </script>
 
 <style lang="scss" scoped>

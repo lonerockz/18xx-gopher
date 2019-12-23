@@ -62,12 +62,15 @@ export default new Vuex.Store({
       const activeGame = bindFirestoreRef('activeGame', db.collection('games').doc('SXkOIfauym3VxeRH6djV'))
       return activeGame
     }),
-    copyTrainsToGame: async ({ commit }, payload) => {
-      // const gameTemplateRef = await db.collection('gameTemplates').doc('YqavGvZGBpNKtLPDMHZy').get()
-      // const trainRoster = gameTemplateRef.data().trainRoster
-      // console.log(trainRoster)
-      // const curGameRef = db.collection('games').doc('SXkOIfauym3VxeRH6djV')
-      // curGameRef.update({ trainRoster: trainRoster })
+    // copyTrainsToGame: async ({ commit }, payload) => {
+    // const gameTemplateRef = await db.collection('gameTemplates').doc('YqavGvZGBpNKtLPDMHZy').get()
+    // const trainRoster = gameTemplateRef.data().trainRoster
+    // console.log(trainRoster)
+    // const curGameRef = db.collection('games').doc('SXkOIfauym3VxeRH6djV')
+    // curGameRef.update({ trainRoster: trainRoster })
+    // },
+    buyStocks: ({ commit }, payload) => {
+      console.log(payload)
     }
   },
   modules: {
