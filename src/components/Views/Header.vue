@@ -75,7 +75,6 @@ export default {
   beforeCreate () {
     this.$store.dispatch('bindActiveGame')
     this.$store.dispatch('bindActiveGamePlayers')
-    this.$store.dispatch('bindActiveGameCompanies')
     this.$store.dispatch('bindAllGameCompanies')
   },
   created () {

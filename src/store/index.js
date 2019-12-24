@@ -27,8 +27,14 @@ export default new Vuex.Store({
     gameTemplates: state => state.gameTemplates,
     activeGamePlayers: state => state.activeGamePlayers,
     activeGame: state => state.activeGame,
-    activeGameCompanies: state => state.activeGameCompanies,
-    allGameCompanies: state => state.allGameCompanies
+    allGameCompanies: state => state.allGameCompanies,
+    activeGameCompanies: function (state) {
+      return state.allGameCompanies.filter(function (company) { return company.hasStarted })
+    },
+    inactiveGameCompanies: function (state) {
+      return state.allGameCompanies.filter(function (company) { return !company.hasStarted })
+    }
+
   },
   mutations: {
     ...vuexfireMutations,
@@ -50,10 +56,10 @@ export default new Vuex.Store({
     bindActiveGamePlayers: firestoreAction(({ bindFirestoreRef }) => {
       return bindFirestoreRef('activeGamePlayers', db.collection('games').doc('SXkOIfauym3VxeRH6djV').collection('players'))
     }),
-    bindActiveGameCompanies: firestoreAction(({ bindFirestoreRef }) => {
-      return bindFirestoreRef('activeGameCompanies', db.collection('games').doc('SXkOIfauym3VxeRH6djV').collection('companies')
-        .where('operatingOrder', '>', 0).orderBy('operatingOrder'))
-    }),
+    // bindActiveGameCompanies: firestoreAction(({ bindFirestoreRef }) => {
+    //   return bindFirestoreRef('activeGameCompanies', db.collection('games').doc('SXkOIfauym3VxeRH6djV').collection('companies')
+    //     .where('operatingOrder', '>', 0).orderBy('operatingOrder'))
+    // }),
     bindAllGameCompanies: firestoreAction(({ bindFirestoreRef }) => {
       return bindFirestoreRef('allGameCompanies', db.collection('games').doc('SXkOIfauym3VxeRH6djV')
         .collection('companies').orderBy('operatingOrder'))

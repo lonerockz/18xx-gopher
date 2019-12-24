@@ -28,18 +28,14 @@
             :key="'buy-company'+ company.id"
           >
             <v-row v-if="((company.parShares < 10) && (company.parShares > 0))">
-              Buy par share of
-              <v-chip @click="addStockAction({'action': 'buy', 'company': company.initials, 'source': 'par'})">
-                {{ company.initials }}
-              </v-chip>
-              at a Par price of: {{ company.parPrice }}
+              <v-btn @click="addStockAction({'player': activeUser.id, 'action': 'buy', 'company': company.initials, 'source': 'par'}); dialog = false">
+                Par {{ company.initials }} @ {{ company.parPrice }}
+              </v-btn>
             </v-row>
             <v-row v-if="company.marketShares > 0">
-              Buy market share of
-              <v-chip @click="addStockAction({'action': 'buy', 'company': company.initials, 'source': 'market'})">
-                {{ company.initials }}
-              </v-chip>
-              at a market price of: {{ company.stockPrice }}
+              <v-btn @click="addStockAction({'player': activeUser.id, 'action': 'buy', 'company': company.initials, 'source': 'market'}); dialog = false">
+                Market {{ company.initials }} @ {{ company.stockPrice }}
+              </v-btn>
             </v-row>
           </div>
           <div
@@ -47,11 +43,9 @@
             :key="'start-company'+ company.id"
           >
             <v-row v-if="company.parShares === 10">
-              Buy Presiendy of
-              <v-chip @click="addStockAction({'action': 'buyPresedincy', 'company': company.initials, 'source': 'par', 'parPrice': '67'}); dialog = false">
-                {{ company.initials }}
-              </v-chip>
-              at a Par price of:
+              <v-btn @click="addStockAction({'player': activeUser.id, 'action': 'buyPresedincy', 'company': company.initials, 'source': 'par', 'parPrice': '67'}); dialog = false">
+                Presiendy {{ company.initials }}
+              </v-btn>
             </v-row>
           </div>
         </v-card-text>
@@ -65,7 +59,7 @@
             text
             @click="dialog = false"
           >
-            Save
+            Cancel
           </v-btn>
         </v-card-actions>
       </v-card>
@@ -79,6 +73,14 @@ export default {
   data () {
     return {
       dialog: false
+    }
+  },
+  props: {
+    activeUser: {
+      type: Object,
+      default: function () {
+        return { default: { id: 'Error' } }
+      }
     }
   },
   computed: {

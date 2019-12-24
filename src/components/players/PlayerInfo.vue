@@ -7,6 +7,7 @@
         <v-row>
           <v-col class="text-center headline">
             Cash: ${{ player.currentCash }}
+            {{ player.id }}
           </v-col>
         </v-row>
         <v-row
@@ -47,13 +48,8 @@
         <div
           class="text-center"
         >
-          <v-btn
-            class="my-1"
-            color="light-green"
-          >
-            Sell
-          </v-btn>
-          <app-buy-stock />
+          <app-sell-stock :active-user="player" />
+          <app-buy-stock :active-user="player" />
           <v-btn
             class="my-1"
             color="light-green"
@@ -75,9 +71,11 @@
 <script>
 import { mapActions } from 'vuex'
 import BuyStock from './BuyStock'
+import SellStock from './SellStock'
 export default {
   components: {
-    appBuyStock: BuyStock
+    appBuyStock: BuyStock,
+    appSellStock: SellStock
   },
   props: {
 
