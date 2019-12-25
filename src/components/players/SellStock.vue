@@ -22,6 +22,8 @@
 </template>
 
 <script>
+// import store from '../../store/index'
+
 import { mapGetters, mapActions } from 'vuex'
 export default {
   data () {
@@ -29,6 +31,10 @@ export default {
       saleStocks: [],
       dialog: false
     }
+  },
+  methods: {
+    ...mapActions(['addStockAction'])
+
   },
   props: {
     activeUser: {
@@ -46,35 +52,34 @@ export default {
       console.log(id, company.company.initials)
       localSaleStocks.push({ company: company.company.initials, sharesAvailalbeToSell: [...Array(maxShares).keys()], value: '0' })
     })
-    // for (const company in this.ownedCompanies) {
-    // console.log(company)
-    // this.salesStocks[id] = { company: company.initials, sharesAvailalbeToSell: [...Array(company.shares).keys()] }
     this.saleStocks = localSaleStocks
     console.log(localSaleStocks)
   },
   beforeDestroy () {
     console.log(this.saleStocks)
+    const _this = this
+    const stockSales = []
+    this.saleStocks.forEach(function (sale) {
+      if (sale.value !== '0') {
+        stockSales.push({ player: _this.activeUser.id, action: 'sell', company: sale.company, numberOfShares: sale.value })
+      }
+    })
+    this.addStockAction(stockSales)
+    console.log('local', stockSales)
   },
   computed: {
     ...mapGetters(['allGameCompanies']),
     ownedCompanies: function () {
       const ownedCos = []
-      // console.log(this.activeUser.shares)
       for (const [key, value] of Object.entries(this.activeUser.shares)) {
-        // console.log('company: ', key, value, this.allGameCompanies)
         ownedCos.push({
           company: this.allGameCompanies.filter(function (company) { return company.initials === key })[0],
           shares: value
         })
       }
-
-      // console.log(ownedCos)
       return ownedCos
     }
 
-  },
-  methods: {
-    ...mapActions(['addStockAction'])
   }
 }
 

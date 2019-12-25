@@ -57,7 +57,7 @@
 import NavMenu from './NavMenu.vue'
 import PlayerList from '../players/Playerlist.vue'
 import CompanyList from '../companies/CompanyList.vue'
-import { mapGetters, mapActions } from 'vuex'
+import { mapGetters } from 'vuex'
 
 export default {
 
@@ -70,12 +70,13 @@ export default {
     ...mapGetters(['activeGame'])
   },
   methods: {
-    ...mapActions(['showNavDrawer'])
+    // ...mapActions(['bindActiveGame', 'bindAllGameCompanies'])
   },
   beforeCreate () {
+    // this.$store.dispatch('bindActiveGame')
     this.$store.dispatch('bindActiveGame')
-    this.$store.dispatch('bindActiveGamePlayers')
     this.$store.dispatch('bindAllGameCompanies')
+    this.$store.dispatch('bindActiveGamePlayers')
   },
   created () {
 

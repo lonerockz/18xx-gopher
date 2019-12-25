@@ -44,7 +44,7 @@
           >
             <v-row v-if="company.parShares === 10">
               <v-btn @click="addStockAction({'player': activeUser.id, 'action': 'buyPresedincy', 'company': company.initials, 'source': 'par', 'parPrice': '67'}); dialog = false">
-                Presiendy {{ company.initials }}
+                presidnecy {{ company.initials }}
               </v-btn>
             </v-row>
           </div>
