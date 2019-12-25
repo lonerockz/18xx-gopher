@@ -22,7 +22,7 @@
                   </v-col>
                 </v-row>
                 <v-row
-                  v-if="company.hasStarted"
+                  v-if="company.stockPrice"
                   no-gutters
                   key="1"
                 >

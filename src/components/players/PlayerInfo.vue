@@ -48,7 +48,49 @@
         <div
           class="text-center"
         >
-          <app-sell-stock :active-user="player" />
+          <div class="text-center">
+            <v-dialog
+              v-model="sellDialog"
+              width="500"
+              persistent
+            >
+              <template v-slot:activator="{ on }">
+                <v-btn
+                  color="red lighten-2"
+                  dark
+                  v-on="on"
+                >
+                  Sell Stock
+                </v-btn>
+              </template>
+              <v-card>
+                <v-card-title
+                  class="headline grey lighten-2"
+                  primary-title
+                >
+                  Select Stock to Sell
+                </v-card-title>
+
+                <app-sell-stock
+                  v-if="sellDialog"
+                  :active-user="player"
+                />
+                <v-divider />
+
+                <v-card-actions>
+                  <v-spacer />
+                  <v-btn
+                    color="primary"
+                    text
+                    @click="sellDialog = false"
+                  >
+                    Sell Selected Shares
+                  </v-btn>
+                </v-card-actions>
+              </v-card>
+            </v-dialog>
+          </div>
+
           <app-buy-stock :active-user="player" />
           <v-btn
             class="my-1"
@@ -73,6 +115,11 @@ import { mapActions } from 'vuex'
 import BuyStock from './BuyStock'
 import SellStock from './SellStock'
 export default {
+  data () {
+    return {
+      sellDialog: false
+    }
+  },
   components: {
     appBuyStock: BuyStock,
     appSellStock: SellStock
