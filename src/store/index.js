@@ -33,6 +33,31 @@ export default new Vuex.Store({
     },
     inactiveGameCompanies: function (state) {
       return state.allGameCompanies.filter(function (company) { return !company.hasStarted })
+    },
+    getShareholders: (state) => (company) => {
+      const companyOwners = []
+
+      state.activeGamePlayers.forEach(player => {
+        Object.entries(player.shares).forEach(share => {
+          if (company === share[0]) {
+            companyOwners.push({ company: company, shares: share[1], player: player.player.id })
+          }
+        })
+      })
+      // console.log(companyOwners)
+      return companyOwners
+    },
+    getPossiblePresidents: (state) => (company) => {
+      const companyOwners = []
+      // console.log(company)
+      state.activeGamePlayers.forEach(player => {
+        Object.entries(player.shares).forEach(share => {
+          if ((company === share[0]) && (share[1] > 1)) {
+            companyOwners.push({ company: company, shares: share[1], player: player.player.id })
+          }
+        })
+      })
+      return companyOwners
     }
 
   },
@@ -56,10 +81,6 @@ export default new Vuex.Store({
     bindActiveGamePlayers: firestoreAction(({ bindFirestoreRef }) => {
       return bindFirestoreRef('activeGamePlayers', db.collection('games').doc('SXkOIfauym3VxeRH6djV').collection('players'))
     }),
-    // bindActiveGameCompanies: firestoreAction(({ bindFirestoreRef }) => {
-    //   return bindFirestoreRef('activeGameCompanies', db.collection('games').doc('SXkOIfauym3VxeRH6djV').collection('companies')
-    //     .where('operatingOrder', '>', 0).orderBy('operatingOrder'))
-    // }),
     bindAllGameCompanies: firestoreAction(({ bindFirestoreRef }) => {
       return bindFirestoreRef('allGameCompanies', db.collection('games').doc('SXkOIfauym3VxeRH6djV')
         .collection('companies').orderBy('operatingOrder'))
@@ -76,11 +97,8 @@ export default new Vuex.Store({
     // const curGameRef = db.collection('games').doc('SXkOIfauym3VxeRH6djV')
     // curGameRef.update({ trainRoster: trainRoster })
     // },
-    buyStocks: ({ commit }, payload) => {
-      console.log(payload)
-    },
     addStockAction: ({ commit }, payload) => {
-      console.log(payload)
+      console.log(payload.action, payload.company, payload.player)
     }
   },
   modules: {
