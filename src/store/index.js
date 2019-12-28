@@ -5,10 +5,47 @@ import Vue from 'vue'
 import Vuex from 'vuex'
 import firebaseConfig from '../../firebaseConfig'
 
+// const increment = firebase.firestore.FieldValue.increment(1)
+
 // console.log(firebaseConfig)
 
 const db = firebase.initializeApp(firebaseConfig).firestore()
 Vue.use(Vuex)
+
+function comitStockTransaction (state, payload) {
+  const player = state.getters.getPlayerByID(payload.player)
+  console.log(player)
+  const playerRef = db.collection('games').doc('SXkOIfauym3VxeRH6djV').collection('players').doc(payload.player)
+  if (payload.action === 'sell') {
+    const targetCompany = 'shares.' + payload.company
+    return playerRef.update({
+      [targetCompany]: firebase.firestore.FieldValue.increment(-payload.numberOfShares)
+    })
+      .then(function () {
+        console.log(player.shares[payload.company], 'Player Shares Updated!')
+        if (player.shares[payload.company] === 0) {
+          console.log('Got Here!!!')
+        }
+        const companyRef = db.collection('games').doc('SXkOIfauym3VxeRH6djV').collection('companies').doc(payload.companyID)
+        return companyRef.update({
+          marketShares: firebase.firestore.FieldValue.increment(payload.numberOfShares)
+        }).then(function () {
+          console.log('Company Shares Updated!')
+        }).catch(function (error) {
+          // The document probably doesn't exist.
+          console.error('Error updating Company: ', error)
+        })
+      })
+      .catch(function (error) {
+        // The document probably doesn't exist.
+        console.error('Error updating Player: ', error)
+      })
+  } else if (payload.action === 'buy') {
+    console.log('buy', payload)
+  } else if (payload.action === 'buyPresedincy') {
+    console.log('presidency', payload)
+  }
+}
 
 export default new Vuex.Store({
   state: {
@@ -28,6 +65,12 @@ export default new Vuex.Store({
     activeGamePlayers: state => state.activeGamePlayers,
     activeGame: state => state.activeGame,
     allGameCompanies: state => state.allGameCompanies,
+    getPlayerByID: (state) => (playerID) => {
+      return state.activeGamePlayers.filter(function (player) { return player.id === playerID })[0]
+    },
+    getCompanyByID: (state) => (companyID) => {
+      return state.allGameCompanies.filter(function (company) { return company.id === companyID })[0]
+    },
     activeGameCompanies: function (state) {
       return state.allGameCompanies.filter(function (company) { return company.hasStarted })
     },
@@ -97,8 +140,12 @@ export default new Vuex.Store({
     // const curGameRef = db.collection('games').doc('SXkOIfauym3VxeRH6djV')
     // curGameRef.update({ trainRoster: trainRoster })
     // },
-    addStockAction: ({ commit }, payload) => {
-      console.log(payload.action, payload.company, payload.player)
+    addStockAction: (state, payload) => {
+      if (Array.isArray(payload)) {
+        payload.forEach(action => comitStockTransaction(state, action))
+      } else {
+        comitStockTransaction(state, payload)
+      }
     }
   },
   modules: {

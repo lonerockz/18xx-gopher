@@ -28,12 +28,12 @@
             :key="'buy-company'+ company.id"
           >
             <v-row v-if="((company.parShares < 10) && (company.parShares > 0) && (company.parPrice < activeUser.currentCash))">
-              <v-btn @click="addStockAction({'player': activeUser.id, 'action': 'buy', 'company': company.initials, 'source': 'par'}); dialog = false">
+              <v-btn @click="addStockAction({'player': activeUser.id, 'action': 'buy', 'company': company.initials,'companyID': company.id, 'source': 'par'}); dialog = false">
                 Par {{ company.initials }} @ {{ company.parPrice }}
               </v-btn>
             </v-row>
             <v-row v-if="((company.marketShares > 0) && (company.stockPrice < activeUser.currentCash))">
-              <v-btn @click="addStockAction({'player': activeUser.id, 'action': 'buy', 'company': company.initials, 'source': 'market'}); dialog = false">
+              <v-btn @click="addStockAction({'player': activeUser.id, 'action': 'buy', 'company': company.initials,'companyID': company.id, 'source': 'market'}); dialog = false">
                 Market {{ company.initials }} @ {{ company.stockPrice }}
               </v-btn>
             </v-row>
@@ -43,7 +43,7 @@
             :key="'start-company'+ company.id"
           >
             <v-row v-if="((company.parShares === 10) && (activeUser.currentCash > 134))">
-              <v-btn @click="addStockAction({'player': activeUser.id, 'action': 'buyPresedincy', 'company': company.initials, 'source': 'par', 'parPrice': '67'}); dialog = false">
+              <v-btn @click="addStockAction([{'player': activeUser.id, 'action': 'buyPresedincy', 'company': company.initials, 'companyID': company.id, 'source': 'par', 'parPrice': '67'}]); dialog = false">
                 presidnecy {{ company.initials }}
               </v-btn>
             </v-row>

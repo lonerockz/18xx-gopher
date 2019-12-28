@@ -61,24 +61,24 @@ export default {
         maxShares -= 2
       }
       maxShares = Math.min(5 - company.company.marketShares, maxShares) + 1
-      console.log(maxShares)
+      // console.log(maxShares)
       // let maxShares = company.shares > (5 - company.company.marketShares) ? 6 - company.company.marketShares : company.shares + 1
-      localSaleStocks.push({ company: company.company.initials, sharesAvailalbeToSell: [...Array(maxShares).keys()], value: '0' })
+      localSaleStocks.push({ company: company.company.initials, companyID: company.company.id, sharesAvailalbeToSell: [...Array(maxShares).keys()], value: '0' })
     })
     this.saleStocks = localSaleStocks
     // console.log(localSaleStocks)
   },
   beforeDestroy () {
-    console.log(this.saleStocks)
+    // console.log(this.saleStocks)
     const _this = this
     const stockSales = []
     this.saleStocks.forEach(function (sale) {
       if (sale.value !== '0') {
-        stockSales.push({ player: _this.activeUser.id, action: 'sell', company: sale.company, numberOfShares: sale.value })
+        stockSales.push({ player: _this.activeUser.id, action: 'sell', company: sale.company, companyID: sale.companyID, numberOfShares: sale.value })
       }
     })
     this.addStockAction(stockSales)
-    console.log('local', stockSales)
+    // console.log('local', stockSales)
   },
   computed: {
     ...mapGetters(['allGameCompanies', 'getShareholders', 'getPossiblePresidents']),
