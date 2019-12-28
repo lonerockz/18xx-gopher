@@ -27,12 +27,12 @@
             v-for="company in allGameCompanies"
             :key="'buy-company'+ company.id"
           >
-            <v-row v-if="((company.parShares < 10) && (company.parShares > 0) && (company.parPrice < activeUser.currentCash))">
+            <v-row v-if="shouldShowBuyAction(company, 'par')">
               <v-btn @click="addStockAction({'player': activeUser.id, 'action': 'buy', 'company': company.initials,'companyID': company.id, 'source': 'par'}); dialog = false">
                 Par {{ company.initials }} @ {{ company.parPrice }}
               </v-btn>
             </v-row>
-            <v-row v-if="((company.marketShares > 0) && (company.stockPrice < activeUser.currentCash))">
+            <v-row v-if="shouldShowBuyAction(company, 'market')">
               <v-btn @click="addStockAction({'player': activeUser.id, 'action': 'buy', 'company': company.initials,'companyID': company.id, 'source': 'market'}); dialog = false">
                 Market {{ company.initials }} @ {{ company.stockPrice }}
               </v-btn>
@@ -43,7 +43,7 @@
             :key="'start-company'+ company.id"
           >
             <v-row v-if="((company.parShares === 10) && (activeUser.currentCash > 134))">
-              <v-btn @click="addStockAction([{'player': activeUser.id, 'action': 'buyPresedincy', 'company': company.initials, 'companyID': company.id, 'source': 'par', 'parPrice': '67'}]); dialog = false">
+              <v-btn @click="addStockAction([{'player': activeUser.id, 'action': 'buyPresedincy', 'company': company.initials, 'companyID': company.id, 'source': 'par', 'parPrice': 67}]); dialog = false">
                 presidnecy {{ company.initials }}
               </v-btn>
             </v-row>
@@ -87,7 +87,27 @@ export default {
     ...mapGetters(['allGameCompanies'])
   },
   methods: {
-    ...mapActions(['addStockAction'])
+    ...mapActions(['addStockAction']),
+    shouldShowBuyAction: function (company, type) {
+      let showBuy = false
+      if ((this.activeUser.shares) && (Object.getOwnPropertyNames(this.activeUser.shares).length > 0)) {
+        // console.log('must have player shares!!!')
+        if (this.activeUser.shares[company.initials] < 6) {
+          if (type === 'par') {
+            if ((company.parShares < 10) && (company.parShares > 0) &&
+              (company.parPrice < this.activeUser.currentCash)) {
+              showBuy = true
+            }
+          } else if (type === 'market') {
+            if ((company.stockPrice) && (company.marketShares > 0) &&
+              (company.stockPrice < this.activeUser.currentCash)) {
+              showBuy = true
+            }
+          }
+        }
+      }
+      return showBuy
+    }
   }
 }
 </script>

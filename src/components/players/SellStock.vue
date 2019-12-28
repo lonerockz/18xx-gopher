@@ -73,7 +73,7 @@ export default {
     const _this = this
     const stockSales = []
     this.saleStocks.forEach(function (sale) {
-      if (sale.value !== '0') {
+      if (sale.value > 0) {
         stockSales.push({ player: _this.activeUser.id, action: 'sell', company: sale.company, companyID: sale.companyID, numberOfShares: sale.value })
       }
     })

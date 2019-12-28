@@ -4,6 +4,7 @@ import 'firebase/firestore'
 import Vue from 'vue'
 import Vuex from 'vuex'
 import firebaseConfig from '../../firebaseConfig'
+const gameID = 'bWmLCmt1USbPKi997n0X' // 'SXkOIfauym3VxeRH6djV'
 
 // const increment = firebase.firestore.FieldValue.increment(1)
 
@@ -14,19 +15,22 @@ Vue.use(Vuex)
 
 function comitStockTransaction (state, payload) {
   const player = state.getters.getPlayerByID(payload.player)
-  console.log(player)
-  const playerRef = db.collection('games').doc('SXkOIfauym3VxeRH6djV').collection('players').doc(payload.player)
+  const company = state.getters.getCompanyByID(payload.companyID)
+  const targetCompany = 'shares.' + payload.company
+  const playerRef = db.collection('games').doc(gameID).collection('players').doc(payload.player)
   if (payload.action === 'sell') {
-    const targetCompany = 'shares.' + payload.company
-    return playerRef.update({
-      [targetCompany]: firebase.firestore.FieldValue.increment(-payload.numberOfShares)
-    })
+    let saleAction = {}
+    if (player.shares[payload.company] === payload.numberOfShares) {
+      saleAction = { [targetCompany]: firebase.firestore.FieldValue.delete() }
+    } else {
+      saleAction = { [targetCompany]: firebase.firestore.FieldValue.increment(-payload.numberOfShares) }
+    }
+    const targetPayout = company.stockPrice * payload.numberOfShares
+    saleAction.currentCash = firebase.firestore.FieldValue.increment(targetPayout)
+    return playerRef.update(saleAction)
       .then(function () {
-        console.log(player.shares[payload.company], 'Player Shares Updated!')
-        if (player.shares[payload.company] === 0) {
-          console.log('Got Here!!!')
-        }
-        const companyRef = db.collection('games').doc('SXkOIfauym3VxeRH6djV').collection('companies').doc(payload.companyID)
+        console.log(player.shares[payload.company], 'Player Shares Sold!')
+        const companyRef = db.collection('games').doc(gameID).collection('companies').doc(payload.companyID)
         return companyRef.update({
           marketShares: firebase.firestore.FieldValue.increment(payload.numberOfShares)
         }).then(function () {
@@ -42,8 +46,61 @@ function comitStockTransaction (state, payload) {
       })
   } else if (payload.action === 'buy') {
     console.log('buy', payload)
+    let pricePaid = 0
+    let companyUpdate = {}
+    if (payload.source === 'par') {
+      pricePaid = company.parPrice
+      companyUpdate = { parShares: firebase.firestore.FieldValue.increment(-1) }
+    } else {
+      pricePaid = company.stockPrice
+      companyUpdate = { marketShares: firebase.firestore.FieldValue.increment(-1) }
+    }
+    return playerRef.update({
+      [targetCompany]: firebase.firestore.FieldValue.increment(1),
+      currentCash: firebase.firestore.FieldValue.increment(-pricePaid)
+    })
+      .then(function () {
+        console.log(player.shares[payload.company], 'Player Shares Bought!')
+        const companyRef = db.collection('games').doc(gameID).collection('companies').doc(payload.companyID)
+        return companyRef.update(companyUpdate)
+          .then(function () {
+            console.log('Company Shares Updated!')
+          }).catch(function (error) {
+          // The document probably doesn't exist.
+            console.error('Error updating Company: ', error)
+          })
+      })
+      .catch(function (error) {
+        // The document probably doesn't exist.
+        console.error('Error updating Player: ', error)
+      })
   } else if (payload.action === 'buyPresedincy') {
     console.log('presidency', payload)
+    const pricePaid = payload.parPrice * 2
+    return playerRef.update({
+      [targetCompany]: firebase.firestore.FieldValue.increment(2),
+      currentCash: firebase.firestore.FieldValue.increment(-pricePaid)
+    })
+      .then(function () {
+        // console.log(player.shares[payload.company], 'Player Shares Bought!')
+        const companyRef = db.collection('games').doc(gameID).collection('companies').doc(payload.companyID)
+        return companyRef.update({
+          parShares: firebase.firestore.FieldValue.increment(-2),
+          parPrice: payload.parPrice,
+          stockPrice: payload.parPrice
+        })
+          .then(function () {
+            console.log('Company Shares Updated!')
+          })
+          .catch(function (error) {
+            // The document probably doesn't exist.
+            console.error('Error updating Company Shares: ', error)
+          })
+      })
+      .catch(function (error) {
+        // The document probably doesn't exist.
+        console.error('Error updating Player: ', error)
+      })
   }
 }
 
@@ -122,22 +179,22 @@ export default new Vuex.Store({
       return bindFirestoreRef('gameTemplates', db.collection('gameTemplates'))
     }),
     bindActiveGamePlayers: firestoreAction(({ bindFirestoreRef }) => {
-      return bindFirestoreRef('activeGamePlayers', db.collection('games').doc('SXkOIfauym3VxeRH6djV').collection('players'))
+      return bindFirestoreRef('activeGamePlayers', db.collection('games').doc(gameID).collection('players'))
     }),
     bindAllGameCompanies: firestoreAction(({ bindFirestoreRef }) => {
-      return bindFirestoreRef('allGameCompanies', db.collection('games').doc('SXkOIfauym3VxeRH6djV')
+      return bindFirestoreRef('allGameCompanies', db.collection('games').doc(gameID)
         .collection('companies').orderBy('operatingOrder'))
     }),
 
     bindActiveGame: firestoreAction(({ bindFirestoreRef }) => {
-      const activeGame = bindFirestoreRef('activeGame', db.collection('games').doc('SXkOIfauym3VxeRH6djV'))
+      const activeGame = bindFirestoreRef('activeGame', db.collection('games').doc(gameID))
       return activeGame
     }),
     // copyTrainsToGame: async ({ commit }, payload) => {
     // const gameTemplateRef = await db.collection('gameTemplates').doc('YqavGvZGBpNKtLPDMHZy').get()
     // const trainRoster = gameTemplateRef.data().trainRoster
     // console.log(trainRoster)
-    // const curGameRef = db.collection('games').doc('SXkOIfauym3VxeRH6djV')
+    // const curGameRef = db.collection('games').doc(gameID)
     // curGameRef.update({ trainRoster: trainRoster })
     // },
     addStockAction: (state, payload) => {

@@ -10,36 +10,38 @@
             {{ player.id }}
           </v-col>
         </v-row>
-        <v-row
-          no-gutters
-          v-for="([company, shares], id) in Object.entries(player.shares)"
-          :key="id+player.player.initials"
-        >
-          <v-col
-            cols="2"
-            v-if="player.presidencies.includes(company)"
+        <template v-if="player.shares">
+          <v-row
+            no-gutters
+            v-for="([company, shares], id) in Object.entries(player.shares)"
+            :key="id+player.player.initials"
           >
-            <v-chip class="deep-purple text-center white--text font-weight-black">
-              P
-            </v-chip>
-          </v-col>
-          <v-col
-            cols="2"
-            v-else
-          />
-          <v-col
-            cols="5"
-            class="text-center title py-a"
-          >
-            {{ company }}
-          </v-col>
-          <v-col
-            cols="3"
-            class="text-center title py-a"
-          >
-            {{ shares }}
-          </v-col>
-        </v-row>
+            <v-col
+              cols="2"
+              v-if="presidencyCheck(company)"
+            >
+              <v-chip class="deep-purple text-center white--text font-weight-black">
+                P
+              </v-chip>
+            </v-col>
+            <v-col
+              cols="2"
+              v-else
+            />
+            <v-col
+              cols="5"
+              class="text-center title py-a"
+            >
+              {{ company }}
+            </v-col>
+            <v-col
+              cols="3"
+              class="text-center title py-a"
+            >
+              {{ shares }}
+            </v-col>
+          </v-row>
+        </template>
       </v-col>
       <v-col
         cols="4"
@@ -114,6 +116,7 @@
 import { mapActions } from 'vuex'
 import BuyStock from './BuyStock'
 import SellStock from './SellStock'
+
 export default {
   data () {
     return {
@@ -145,6 +148,17 @@ export default {
     buyStock: function (playerID) {
       this.$store.dispatch('buyStocks', { playerID })
       // console.log(this.player.id)
+    },
+    presidencyCheck: function (company) {
+      let result = false
+      if (this.player.presidencies) {
+        if (Object.getOwnPropertyNames(this.player.presidencies).length === 0) {
+          if (this.player.presidencies.includes(company)) {
+            result = true
+          }
+        }
+      }
+      return result
     }
   }
 }
