@@ -1,9 +1,9 @@
 <template>
   <v-card-text>
     {{ activeUser }}
-    <template v-if="ownedCompanies">
+    <template v-if="companiesOwnedByPlayer(activeUser)">
       <div
-        v-for="companyOwned in ownedCompanies"
+        v-for="companyOwned in companiesOwnedByPlayer(activeUser)"
         :key="'sell-company'+ companyOwned.company.id"
       >
         <v-row>
@@ -59,22 +59,24 @@ export default {
     }
   },
   created () {
-    if (!isEmpty(this.ownedCompanies)) {
+    if (!isEmpty(this.companiesOwnedByPlayer(this.activeUser))) {
       const localSaleStocks = []
       // console.log(this.ownedCompanies)
       const _this = this
-      this.ownedCompanies.forEach(function (company, id) {
-        console.log(company.shares)
+      this.companiesOwnedByPlayer(this.activeUser).forEach(function (company, id) {
+        // console.log(company.company.initials, company.shares)
         let maxShares = company.shares + 1
-        if ((_this.getPossiblePresidents(company.company.iniitals).length < 2) &&
+        if (!isEmpty(company.company.president)) {
+          if ((_this.getPossiblePresidents(company.company.iniitals).length < 2) &&
         (company.company.president.id === _this.activeUser.id)) {
-        // console.log(id, company.company.initials)
-          maxShares -= 2
+            // console.log(id, company.company.initials)
+            maxShares -= 2
+          }
         }
         if (company.company.marketShares) {
           maxShares = Math.min(6 - company.company.marketShares, maxShares)
         }
-        console.log('max Shares', maxShares)
+        // console.log('max Shares', maxShares)
         // let maxShares = company.shares > (5 - company.company.marketShares) ? 6 - company.company.marketShares : company.shares + 1
         if (maxShares > 0) {
           localSaleStocks.push({ company: company.company.initials, companyID: company.company.id, sharesAvailalbeToSell: [...Array(maxShares).keys()], value: '0' })
@@ -82,7 +84,7 @@ export default {
           localSaleStocks.push({ company: company.company.initials, companyID: company.company.id, sharesAvailalbeToSell: [0], value: '0' })
         }
       })
-      console.log('sale stocks array', localSaleStocks)
+      // console.log('sale stocks array', localSaleStocks)
       this.saleStocks = localSaleStocks
     }
     // console.log(localSaleStocks)
@@ -100,21 +102,7 @@ export default {
     // console.log('local', stockSales)
   },
   computed: {
-    ...mapGetters(['allGameCompanies', 'getShareholders', 'getPossiblePresidents']),
-    ownedCompanies: function () {
-      if (isEmpty(this.activeUser.shares)) {
-        return null
-      } else {
-        const ownedCos = []
-        for (const [ownedCompany, share] of Object.entries(this.activeUser.shares)) {
-          ownedCos.push({
-            company: this.allGameCompanies.filter(function (company) { return company.initials === ownedCompany })[0],
-            shares: share
-          })
-        }
-        return ownedCos
-      }
-    }
+    ...mapGetters(['allGameCompanies', 'getShareholders', 'getPossiblePresidents', 'companiesOwnedByPlayer'])
 
   }
 }

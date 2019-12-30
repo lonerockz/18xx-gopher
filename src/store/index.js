@@ -4,6 +4,7 @@ import 'firebase/firestore'
 import Vue from 'vue'
 import Vuex from 'vuex'
 import firebaseConfig from '../../firebaseConfig'
+import { isEmpty } from 'lodash-es'
 const gameID = 'bWmLCmt1USbPKi997n0X' // 'SXkOIfauym3VxeRH6djV'
 
 // const increment = firebase.firestore.FieldValue.increment(1)
@@ -106,7 +107,6 @@ function comitStockTransaction (state, payload) {
       })
   }
 }
-
 export default new Vuex.Store({
   state: {
     games: [],
@@ -137,6 +137,12 @@ export default new Vuex.Store({
     inactiveGameCompanies: function (state) {
       return state.allGameCompanies.filter(function (company) { return !company.hasStarted })
     },
+    companiesWithPresidents: function (state) {
+      return state.allGameCompanies.filter(function (company) { return !isEmpty(company.president) })
+    },
+    companiesWithoutPresidents: function (state) {
+      return state.allGameCompanies.filter(function (company) { return isEmpty(company.president) })
+    },
     getShareholders: (state) => (company) => {
       const companyOwners = []
 
@@ -161,8 +167,22 @@ export default new Vuex.Store({
         })
       })
       return companyOwners
+    },
+    companiesOwnedByPlayer: (state) => (player) => {
+      if (isEmpty(player.shares)) {
+        return null
+      } else {
+        const ownedCos = []
+        // console.log(Object.entries(player.shares))
+        for (const [ownedCompany, share] of Object.entries(player.shares)) {
+          ownedCos.push({
+            company: state.allGameCompanies.filter(function (company) { return company.initials === ownedCompany })[0],
+            shares: share
+          })
+        }
+        return ownedCos
+      }
     }
-
   },
   mutations: {
     ...vuexfireMutations,

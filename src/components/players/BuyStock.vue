@@ -24,7 +24,7 @@
 
         <v-card-text>
           <div
-            v-for="company in allGameCompanies"
+            v-for="company in companiesWithPresidents"
             :key="'buy-company'+ company.id"
           >
             <v-row v-if="shouldShowBuyAction(company, 'par')">
@@ -39,10 +39,12 @@
             </v-row>
           </div>
           <div
-            v-for="company in allGameCompanies"
-            :key="'start-company'+ company.id"
+            v-if="(activeUser.currentCash > 134)"
           >
-            <v-row v-if="((company.parShares === 10) && (activeUser.currentCash > 134))">
+            <v-row
+              v-for="company in companiesWithoutPresidents"
+              :key="'start-company'+ company.id"
+            >
               <v-btn @click="addStockAction([{'player': activeUser.id, 'action': 'buyPresedincy', 'company': company.initials, 'companyID': company.id, 'source': 'par', 'parPrice': 67}]); dialog = false">
                 presidnecy {{ company.initials }}
               </v-btn>
@@ -69,6 +71,8 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
+import { isEmpty, isUndefined } from 'lodash-es'
+
 export default {
   data () {
     return {
@@ -84,30 +88,44 @@ export default {
     }
   },
   computed: {
-    ...mapGetters(['allGameCompanies'])
+    ...mapGetters(['allGameCompanies', 'companiesWithoutPresidents', 'companiesWithPresidents'])
   },
   methods: {
     ...mapActions(['addStockAction']),
     shouldShowBuyAction: function (company, type) {
       let showBuy = false
-      if ((this.activeUser.shares) && (Object.getOwnPropertyNames(this.activeUser.shares).length > 0)) {
-        // console.log('must have player shares!!!')
-        if (this.activeUser.shares[company.initials] < 6) {
-          if (type === 'par') {
-            if ((company.parShares < 10) && (company.parShares > 0) &&
+      let playerCanBuy = false
+      if (isEmpty(this.activeUser.shares)) {
+        // doesn't own shares so can buy anything that is available
+        // console.log('Player has no shares')
+        playerCanBuy = true
+      } else if (isUndefined(this.activeUser.shares[company.initials])) {
+        playerCanBuy = true
+        // console.log('Player has no shares in this company')
+      } else if (this.activeUser.shares[company.initials] < 6) {
+        playerCanBuy = true
+        // console.log('Player less than 6 shares in this company')
+      } else {
+        // console.log('Player cant buy shares in this company', this.activeUser.shares[company.initials])
+      }
+      if (playerCanBuy) {
+        if (type === 'par') {
+          if ((company.parShares < 9) && (company.parShares > 0) &&
               (company.parPrice < this.activeUser.currentCash)) {
-              showBuy = true
-            }
-          } else if (type === 'market') {
-            if ((company.stockPrice) && (company.marketShares > 0) &&
+            showBuy = true
+          }
+        } else if (type === 'market') {
+          if ((company.stockPrice) && (company.marketShares > 0) &&
               (company.stockPrice < this.activeUser.currentCash)) {
-              showBuy = true
-            }
+            showBuy = true
           }
         }
       }
       return showBuy
     }
+  },
+  created () {
+    // console.log(this.companiesWithPresidents)
   }
 }
 </script>
