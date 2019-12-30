@@ -84,10 +84,13 @@ function comitStockTransaction (state, payload) {
       .then(function () {
         // console.log(player.shares[payload.company], 'Player Shares Bought!')
         const companyRef = db.collection('games').doc(gameID).collection('companies').doc(payload.companyID)
+        const presidentLoc = '/games/' + gameID + '/players/' + payload.player
+        console.log(presidentLoc)
         return companyRef.update({
           parShares: firebase.firestore.FieldValue.increment(-2),
           parPrice: payload.parPrice,
-          stockPrice: payload.parPrice
+          stockPrice: payload.parPrice,
+          president: db.doc(presidentLoc)
         })
           .then(function () {
             console.log('Company Shares Updated!')
