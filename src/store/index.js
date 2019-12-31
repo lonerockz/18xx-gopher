@@ -4,7 +4,7 @@ import 'firebase/firestore'
 import Vue from 'vue'
 import Vuex from 'vuex'
 import firebaseConfig from '../../firebaseConfig'
-import { isEmpty } from 'lodash-es'
+import { isEmpty, isUndefined } from 'lodash-es'
 const gameID = 'bWmLCmt1USbPKi997n0X' // 'SXkOIfauym3VxeRH6djV'
 
 // const increment = firebase.firestore.FieldValue.increment(1)
@@ -143,7 +143,34 @@ export default new Vuex.Store({
     companiesWithoutPresidents: function (state) {
       return state.allGameCompanies.filter(function (company) { return isEmpty(company.president) })
     },
-    getShareholders: (state) => (company) => {
+    getShareholders: () => (company) => {
+      const shareholders = {}
+      // console.log('got to newGetShareholders')
+      company.certificates.forEach(certificate => {
+        if (isUndefined(shareholders[certificate.owner])) {
+          shareholders[certificate.owner] = certificate.shares
+        } else {
+          shareholders[certificate.owner] += certificate.shares
+        }
+        // console.log(certificate.owner, ' : ', certificate.shares, certificate.type)
+      })
+      // console.log(shareholders)
+      return shareholders
+    },
+    getSharesByPlayerID: (state, getters) => (playerID) => {
+      // console.log('get shares by ID: ', playerID)
+      const playerShares = []
+      state.allGameCompanies.forEach(company => {
+        // console.log(company.initials, ' : ', getters.ngetShareholders(company))
+        if (!isUndefined(getters.getShareholders(company)[playerID])) {
+          playerShares.push({ company: company.initials, shares: getters.getShareholders(company)[playerID] })
+        }
+      })
+      console.log(playerShares)
+      return playerShares
+    },
+
+    oldGetShareholders: (state) => (company) => {
       const companyOwners = []
 
       state.activeGamePlayers.forEach(player => {

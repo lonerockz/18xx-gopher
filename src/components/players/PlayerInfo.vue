@@ -10,38 +10,35 @@
             {{ player.id }}
           </v-col>
         </v-row>
-        <template v-if="player.shares">
-          <v-row
-            no-gutters
-            v-for="([company, shares], id) in Object.entries(player.shares)"
-            :key="id+player.player.initials"
+        <v-row
+          v-for="shares in getSharesByPlayerID(player.id)"
+          :key="'shares' + player.id + shares.company"
+        >
+          <v-col
+            cols="2"
+            v-if="presidencyCheck(shares.company)"
           >
-            <v-col
-              cols="2"
-              v-if="presidencyCheck(company)"
-            >
-              <v-chip class="deep-purple text-center white--text font-weight-black">
-                P
-              </v-chip>
-            </v-col>
-            <v-col
-              cols="2"
-              v-else
-            />
-            <v-col
-              cols="5"
-              class="text-center title py-a"
-            >
-              {{ company }}
-            </v-col>
-            <v-col
-              cols="3"
-              class="text-center title py-a"
-            >
-              {{ shares }}
-            </v-col>
-          </v-row>
-        </template>
+            <v-chip class="deep-purple text-center white--text font-weight-black">
+              P
+            </v-chip>
+          </v-col>
+          <v-col
+            cols="2"
+            v-else
+          />
+          <v-col
+            cols="5"
+            class="text-center title py-a"
+          >
+            {{ shares.company }}
+          </v-col>
+          <v-col
+            cols="3"
+            class="text-center title py-a"
+          >
+            {{ shares.shares }}
+          </v-col>
+        </v-row>
       </v-col>
       <v-col
         cols="4"
@@ -113,7 +110,7 @@
 </template>
 
 <script>
-import { mapActions } from 'vuex'
+import { mapActions, mapGetters } from 'vuex'
 import BuyStock from './BuyStock'
 import SellStock from './SellStock'
 
@@ -126,6 +123,9 @@ export default {
   components: {
     appBuyStock: BuyStock,
     appSellStock: SellStock
+  },
+  computed: {
+    ...mapGetters(['getSharesByPlayerID'])
   },
   props: {
 

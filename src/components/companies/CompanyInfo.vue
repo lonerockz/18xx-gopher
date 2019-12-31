@@ -5,6 +5,7 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex'
 export default {
   props: {
     company: {
@@ -21,6 +22,13 @@ export default {
         }
       }
     }
+  },
+  computed: {
+    ...mapGetters(['getShareholders'])
+  },
+  created () {
+    console.log('company info')
+    this.getShareholders(this.company)
   }
 }
 </script>
