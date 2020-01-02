@@ -73,6 +73,23 @@
 import { mapGetters, mapActions } from 'vuex'
 import { isEmpty, isUndefined } from 'lodash-es'
 
+function playerCanBuy (player, company) {
+  let playerCanBuy = false
+  if (isEmpty(player.shares)) {
+    // doesn't own shares so can buy anything that is available
+    // console.log('Player has no shares')
+    playerCanBuy = true
+  } else if (isUndefined(player.shares[company.initials])) {
+    playerCanBuy = true
+    // console.log('Player has no shares in this company')
+  } else if (player.shares[company.initials] < 6) {
+    playerCanBuy = true
+    // console.log('Player less than 6 shares in this company')
+  }
+  // console.log('can buy: ', playerCanBuy)
+  return playerCanBuy
+}
+
 export default {
   data () {
     return {
@@ -88,35 +105,22 @@ export default {
     }
   },
   computed: {
-    ...mapGetters(['allGameCompanies', 'companiesWithoutPresidents', 'companiesWithPresidents'])
+    ...mapGetters(['allGameCompanies', 'companiesWithoutPresidents', 'companiesWithPresidents', 'getShareholders'])
   },
   methods: {
     ...mapActions(['addStockAction']),
     shouldShowBuyAction: function (company, type) {
       let showBuy = false
-      let playerCanBuy = false
-      if (isEmpty(this.activeUser.shares)) {
-        // doesn't own shares so can buy anything that is available
-        // console.log('Player has no shares')
-        playerCanBuy = true
-      } else if (isUndefined(this.activeUser.shares[company.initials])) {
-        playerCanBuy = true
-        // console.log('Player has no shares in this company')
-      } else if (this.activeUser.shares[company.initials] < 6) {
-        playerCanBuy = true
-        // console.log('Player less than 6 shares in this company')
-      } else {
-        // console.log('Player cant buy shares in this company', this.activeUser.shares[company.initials])
-      }
-      if (playerCanBuy) {
+      if (playerCanBuy(this.activeUser, company)) {
+        const shareholders = this.getShareholders(company)
+        // console.log('buy : ', shareholders)
         if (type === 'par') {
-          if ((company.parShares < 9) && (company.parShares > 0) &&
+          if ((!isUndefined(shareholders.par)) &&
               (company.parPrice < this.activeUser.currentCash)) {
             showBuy = true
           }
         } else if (type === 'market') {
-          if ((company.stockPrice) && (company.marketShares > 0) &&
-              (company.stockPrice < this.activeUser.currentCash)) {
+          if ((!isUndefined(shareholders.market)) && (company.stockPrice < this.activeUser.currentCash)) {
             showBuy = true
           }
         }
