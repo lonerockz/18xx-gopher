@@ -11,12 +11,12 @@
           </v-col>
         </v-row>
         <v-row
-          v-for="shares in getSharesByPlayerID(player.id)"
-          :key="'shares' + player.id + shares.company"
+          v-for="[company, shares] in Object.entries(getSharesByPlayerID(player.id))"
+          :key="'shares' + player.id + company"
         >
           <v-col
             cols="2"
-            v-if="presidencyCheck(shares.company)"
+            v-if="presidencyCheck(company)"
           >
             <v-chip class="deep-purple text-center white--text font-weight-black">
               P
@@ -30,13 +30,13 @@
             cols="5"
             class="text-center title py-a"
           >
-            {{ shares.company }}
+            {{ company }}
           </v-col>
           <v-col
             cols="3"
             class="text-center title py-a"
           >
-            {{ shares.shares }}
+            {{ shares }}
           </v-col>
         </v-row>
       </v-col>
