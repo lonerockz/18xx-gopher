@@ -5,7 +5,7 @@ import Vue from 'vue'
 import Vuex from 'vuex'
 import firebaseConfig from '../../firebaseConfig'
 import { isEmpty, isUndefined } from 'lodash-es'
-const gameID = 'oLEGRkmL0N7xK7eYbrur' // 'SXkOIfauym3VxeRH6djV'
+const gameID = 'g94p6lxmMNZUZSAI3J1J'
 
 // console.log(firebaseConfig)
 
@@ -122,11 +122,12 @@ function comitStockTransaction (state, payload) {
   }
 }
 function presCheck (company) {
+  console.log('prez check: ', company)
   if ((company.certificates.presidentsCertificate.owner === 'par') ||
   (company.certificates.presidentsCertificate.owner === 'company')) {
-    return true
-  } else {
     return false
+  } else {
+    return true
   }
 }
 export default new Vuex.Store({
@@ -144,9 +145,9 @@ export default new Vuex.Store({
   getters: {
     games: state => state.games,
     gameTemplates: state => state.gameTemplates,
-    activeGamePlayers: state => state.activeGamePlayers,
+    activeGamePlayers: state => state.activeGame.players,
     activeGame: state => state.activeGame,
-    allGameCompanies: state => state.acctiveGameCompanies,
+    allGameCompanies: state => state.activeGame.companies,
     getPlayerByID: (state) => (playerID) => {
       return state.activeGamePlayers.filter(function (player) { return player.id === playerID })[0]
     },
@@ -163,10 +164,10 @@ export default new Vuex.Store({
       return state.allGameCompanies.filter(function (company) { return !company.hasStarted })
     },
     companiesWithPresidents: function (state) {
-      return state.allGameCompanies.filter(function (company) { return !presCheck(company) })
+      return state.allGameCompanies.filter(function (company) { return presCheck(company) })
     },
     companiesWithoutPresidents: function (state) {
-      return state.allGameCompanies.filter(function (company) { return presCheck(company) })
+      return state.allGameCompanies.filter(function (company) { return !presCheck(company) })
     },
     getShareholders: () => (company) => {
       const shareholders = {}
@@ -192,7 +193,7 @@ export default new Vuex.Store({
           // playerShares.push({ company: company.initials, shares: getters.getShareholders(company)[playerID] })
         }
       })
-      console.log(playerShares)
+      console.log('playerShares: ', playerShares)
       return playerShares
     },
 
@@ -254,14 +255,13 @@ export default new Vuex.Store({
     bindGameTemplates: firestoreAction(({ bindFirestoreRef }) => {
       return bindFirestoreRef('gameTemplates', db.collection('gameTemplates'))
     }),
-    bindActiveGamePlayers: firestoreAction(({ bindFirestoreRef }) => {
-      return bindFirestoreRef('activeGamePlayers', db.collection('games').doc(gameID).collection('players'))
-    }),
-    bindAllGameCompanies: firestoreAction(({ bindFirestoreRef }) => {
-      return bindFirestoreRef('allGameCompanies', db.collection('games').doc(gameID)
-        .collection('companies').orderBy('operatingOrder'))
-    }),
-
+    // bindActiveGamePlayers: firestoreAction(({ bindFirestoreRef }) => {
+    //   return bindFirestoreRef('activeGamePlayers', db.collection('games').doc(gameID).collection('players'))
+    // }),
+    // bindAllGameCompanies: firestoreAction(({ bindFirestoreRef }) => {
+    //   return bindFirestoreRef('allGameCompanies', db.collection('games').doc(gameID)
+    //     .collection('companies').orderBy('operatingOrder'))
+    // }),
     bindActiveGame: firestoreAction(({ bindFirestoreRef }) => {
       const activeGame = bindFirestoreRef('activeGame', db.collection('games').doc(gameID))
       return activeGame

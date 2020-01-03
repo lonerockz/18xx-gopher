@@ -77,7 +77,7 @@ function playerCanBuy (player, company) {
   let playerCanBuy = false
   if (isEmpty(player.shares)) {
     // doesn't own shares so can buy anything that is available
-    // console.log('Player has no shares')
+    console.log('Player has no shares')
     playerCanBuy = true
   } else if (isUndefined(player.shares[company.initials])) {
     playerCanBuy = true
@@ -129,7 +129,8 @@ export default {
     }
   },
   created () {
-    // console.log(this.companiesWithPresidents)
+    console.log('Cos with Prez: ', this.allGameCompanies)
+    console.log('Cos without Prez: ', this.companiesWithoutPresidents)
   }
 }
 </script>

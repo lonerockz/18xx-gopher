@@ -70,13 +70,13 @@ export default {
     ...mapGetters(['activeGame'])
   },
   methods: {
-    // ...mapActions(['bindActiveGame', 'bindAllGameCompanies'])
+    // ...mapActions(['bindActiveGame'])
   },
   beforeCreate () {
-    // this.$store.dispatch('bindActiveGame')
+    // this.bindActiveGame()
     this.$store.dispatch('bindActiveGame')
-    this.$store.dispatch('bindAllGameCompanies')
-    this.$store.dispatch('bindActiveGamePlayers')
+    // this.$store.dispatch('bindAllGameCompanies')
+    // this.$store.dispatch('bindActiveGamePlayers')
   },
   created () {
 
