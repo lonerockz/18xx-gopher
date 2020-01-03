@@ -1,0 +1,34 @@
+"stockMarket":{
+  "rowA": { "col01": { "price": 60},"col02": { "price": 67},"col03": { "price": 71},
+  "col04": { "price": 76},"col05": { "price": 82},"col06": { "price": 90},
+  "col07": { "price": 100},"col08": { "price": 112},"col09": { "price": 126},
+  "col10": { "price": 142},"col11": { "price": 160},"col12": { "price": 180},
+  "col13": { "price": 200},"col14": { "price": 225},"col15": { "price": 250},
+  "col16": { "price": 275},"col17": { "price": 300},"col18": { "price": 325},"col19": { "price": 350}},
+  "rowB": { "col01": { "price": 53},"col02": { "price": 60},"col03": { "price": 66},
+  "col04": { "price": 70},"col05": { "price": 76},"col06": { "price": 82}
+  ,"col07": { "price": 90},"col08": { "price": 100},"col09": { "price": 112}
+  ,"col10": { "price": 126},"col11": { "price": 142},"col12": { "price": 160}
+  ,"col13": { "price": 180}, "col14": { "price": 200},"col15": { "price": 220}
+  ,"col16": { "price": 240},"col17": { "price": 260},"col18": { "price": 280},"col19": { "price": 300}},
+  "rowC": { "col01": { "price": 46},"col02": { "price": 55},"col03": { "price": 60},
+  "col04": { "price": 65},"col05": { "price": 70},"col06": { "price": 76},
+  "col07": { "price": 82},"col08": { "price": 90},"col09": { "price": 100},
+  "col10": { "price": 111}, "col11": { "price": 125},"col12": { "price": 140},
+  "col13": { "price": 155}, "col14": { "price": 170}, "col15": { "price": 185},
+  "col16": { "price": 200}, "col17": { "price": -1}, "col18": { "price": -1},"col19": { "price": -1}},
+  "rowD": { "col01": { "price": 39},"col02": { "price": 48},"col03": { "price": 54},"col04": { "price": 60},
+  "col05": { "price": 66},"col06": { "price": 71},"col07": { "price": 76},"col08": { "price": 82},
+  "col09": { "price": 90},"col10": { "price": 100},"col11": { "price": 110},"col12": { "price": 120},
+  "col13": { "price": 130}, "col14": { "price": -1}, "col15": { "price": -1}, "col16": { "price": -1}},
+  "rowE": { "col01": { "price": 32},"col02": { "price": 41},"col03": { "price": 48},"col04": { "price": 55},
+  "col05": { "price": 62},"col06": { "price": 67},"col07": { "price": 71},"col08": { "price": 76},
+  "col09": { "price": 82},"col10": { "price": 90},"col11": { "price": 100},"col012": { "price": -1},
+  "col13": { "price": -1}},
+  "rowF": { "col01": { "price": 25},"col02": { "price": 34},"col03": { "price": 42},"col04": { "price": 50},"col05": { "price": 58},"col06": { "price": 65},"col07": { "price": 67},"col08": { "price": 71},"col09": { "price": 75},"col10": { "price": 80},"col11": { "price": -1}},
+  "rowG": { "col01": { "price": 18},"col02": { "price": 27},"col03": { "price": 36},"col04": { "price": 45},"col05": { "price": 54},"col06": { "price": 63},"col07": { "price": 67},"col08": { "price": 69},"col09": { "price": 70},"col10": { "price": -1}},
+  "rowH": { "col01": { "price": 10},"col02": { "price": 20},"col03": { "price": 30},"col04": { "price": 40},"col05": { "price": 50},"col06": { "price": 60},"col07": { "price": 67},"col08": { "price": 68},"col09": { "price": -1}},
+  "rowI": { "col01": { "price": -1},"col02": { "price": 10},"col03": { "price": 20},"col04": { "price": 30},"col05": { "price": 40},"col06": { "price": 50},"col07": { "price": 60},"col08": { "price": -1}},
+  "rowJ": { "col01": { "price": -1},"col02": { "price": -1},"col03": { "price": 10},"col04": { "price": 20},"col05": { "price": 30},"col06": { "price": 40},"col07": { "price": 50},"col08": { "price": -1}},
+  "rowK": { "col01": { "price": -1},"col02": { "price": -1},"col03": { "price": -1},"col04": { "price": 10},"col05": { "price": 20},"col06": { "price": 30},"col07": { "price": 40},"col08": { "price": -1}}
+}

@@ -146,7 +146,7 @@ export default new Vuex.Store({
     gameTemplates: state => state.gameTemplates,
     activeGamePlayers: state => state.activeGamePlayers,
     activeGame: state => state.activeGame,
-    allGameCompanies: state => state.allGameCompanies,
+    allGameCompanies: state => state.acctiveGameCompanies,
     getPlayerByID: (state) => (playerID) => {
       return state.activeGamePlayers.filter(function (player) { return player.id === playerID })[0]
     },
@@ -248,9 +248,9 @@ export default new Vuex.Store({
     showNavDrawer: ({ commit }) => {
       commit('showNavDrawer')
     },
-    bindGames: firestoreAction(({ bindFirestoreRef }) => {
-      return bindFirestoreRef('games', db.collection('games'))
-    }),
+    // bindGames: firestoreAction(({ bindFirestoreRef }) => {
+    //   return bindFirestoreRef('games', db.collection('games'))
+    // }),
     bindGameTemplates: firestoreAction(({ bindFirestoreRef }) => {
       return bindFirestoreRef('gameTemplates', db.collection('gameTemplates'))
     }),

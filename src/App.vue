@@ -8,7 +8,7 @@
 <script>
 import Header from './components/Views/Header'
 import Footer from './components/Views/Footer'
-import { mapActions } from 'vuex'
+// import { mapActions } from 'vuex'
 
 export default {
   name: 'App',
@@ -18,11 +18,11 @@ export default {
     appFooter: Footer
   },
   methods: {
-    ...mapActions(['bindGameTemplates', 'bindGames'])
+    // ...mapActions(['bindGameTemplates', 'bindGames'])
   },
   beforeCreate () {
-    this.$store.dispatch('bindGames')
-    this.$store.dispatch('bindGameTemplates')
+    // this.$store.dispatch('bindGames')
+    // this.$store.dispatch('bindGameTemplates')
   },
 
   data: () => ({
