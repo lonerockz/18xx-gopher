@@ -129,7 +129,7 @@ export default {
     }
   },
   created () {
-    console.log('Cos with Prez: ', this.allGameCompanies)
+    console.log('Cos with Prez: ', this.companiesWithPresidents)
     console.log('Cos without Prez: ', this.companiesWithoutPresidents)
   }
 }
