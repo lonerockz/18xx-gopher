@@ -4,7 +4,7 @@ import 'firebase/firestore'
 import Vue from 'vue'
 import Vuex from 'vuex'
 import firebaseConfig from '../../firebaseConfig'
-import { isEmpty, isUndefined, filter } from 'lodash-es'
+import { isUndefined, filter } from 'lodash-es'
 const gameID = 'g94p6lxmMNZUZSAI3J1J'
 
 // console.log(firebaseConfig)
@@ -24,7 +24,7 @@ function getTargetShares (company, shareType, ownerID) {
   return certificates
 }
 
-function saleStockTransaction (payload, company, playerRef) {
+function saleStockTransaction (payload, company) {
   console.log(payload, company)
   const targetCerts = getTargetShares(company, 'certificate', payload.player)
   const companyUpdate = {}
@@ -33,75 +33,60 @@ function saleStockTransaction (payload, company, playerRef) {
   }
   const cashGained = company.stockPrice * payload.numberOfShares
   console.log(' cash:', cashGained, 'update: ', companyUpdate)
-  playerRef.update({
-    currentCash: firebase.firestore.FieldValue.increment(cashGained)
-  })
-    .then(function () {
-      console.log('Player Shares Sold!')
-      const companyRef = db.collection('games').doc(gameID).collection('companies').doc(payload.companyID)
-      companyRef.update(companyUpdate)
-        .then(function () {
-          console.log('Company Shares Updated!')
-        }).catch(function (error) {
-          // The document probably doesn't exist.
-          console.error('Error updating Company: ', error)
-        })
-    })
-    .catch(function (error) {
-      // The document probably doesn't exist.
-      console.error('Error updating Player: ', error)
-    })
+  // playerRef.update({
+  //   currentCash: firebase.firestore.FieldValue.increment(cashGained)
+  // })
+  //   .then(function () {
+  //     console.log('Player Shares Sold!')
+  //     const companyRef = db.collection('games').doc(gameID).collection('companies').doc(payload.companyID)
+  //     companyRef.update(companyUpdate)
+  //       .then(function () {
+  //         console.log('Company Shares Updated!')
+  //       }).catch(function (error) {
+  //         // The document probably doesn't exist.
+  //         console.error('Error updating Company: ', error)
+  //       })
+  //   })
+  //   .catch(function (error) {
+  //     // The document probably doesn't exist.
+  //     console.error('Error updating Player: ', error)
+  //   })
 }
-function buyStockTransaction (payload, company, playerRef) {
+function buyStockTransaction (payload, company) {
   const targetCert = getTargetShares(company, 'certificate', payload.source)[0]
+  console.log(company)
   let pricePaid = 0
-  const companyUpdate = { ['certificates.' + targetCert + '.owner']: payload.player }
   if (payload.source === 'par') {
     pricePaid = company.parPrice
   } else if (payload.source === 'market') {
     pricePaid = company.stockPrice
   }
-  return playerRef.update({
-    currentCash: firebase.firestore.FieldValue.increment(-pricePaid)
+  console.log(targetCert, pricePaid)
+  const gameRef = db.collection('games').doc(gameID)
+  return gameRef.update({
+    ['players.' + payload.player + '.currentCash']: firebase.firestore.FieldValue.increment(-pricePaid),
+    ['companies.' + payload.companyID + '.certificates.' + targetCert + '.owner']: payload.player
   })
     .then(function () {
-      console.log('Player Shares Bought!')
-      const companyRef = db.collection('games').doc(gameID).collection('companies').doc(payload.companyID)
-      return companyRef.update(companyUpdate)
-        .then(function () {
-          console.log('Company Shares Updated!')
-        }).catch(function (error) {
-        // The document probably doesn't exist.
-          console.error('Error updating Company: ', error)
-        })
-    })
-    .catch(function (error) {
+      console.log('Company Shares Updated!')
+    }).catch(function (error) {
       // The document probably doesn't exist.
-      console.error('Error updating Player: ', error)
+      console.error('Error updating Company: ', error)
     })
 }
-function buyPresidnecyTransaction (payload, playerRef) {
+function buyPresidnecyTransaction (payload) {
+  const gameRef = db.collection('games').doc(gameID)
   console.log('presidency', payload)
   const pricePaid = payload.parPrice * 2
-  return playerRef.update({
-    currentCash: firebase.firestore.FieldValue.increment(-pricePaid)
+  return gameRef.update({
+    ['players.' + payload.player + '.currentCash']: firebase.firestore.FieldValue.increment(-pricePaid),
+    ['companies.' + payload.companyID + '.parPrice']: payload.parPrice,
+    ['companies.' + payload.companyID + '.stockPrice']: payload.parPrice,
+    ['companies.' + payload.companyID + '.certificates.presidentsCertificate.owner']: payload.player
   })
     .then(function () {
       // console.log(player.shares[payload.company], 'Player Shares Bought!')
-      const companyRef = db.collection('games').doc(gameID).collection('companies').doc(payload.companyID)
-      // console.log(presidentLoc)
-      return companyRef.update({
-        parPrice: payload.parPrice,
-        stockPrice: payload.parPrice,
-        'certificates.presidentsCertificate.owner': payload.player
-      })
-        .then(function () {
-          console.log('Company Shares Updated!')
-        })
-        .catch(function (error) {
-          // The document probably doesn't exist.
-          console.error('Error updating Company Shares: ', error)
-        })
+      console.log('Game Updated: ', payload)
     })
     .catch(function (error) {
       // The document probably doesn't exist.
@@ -109,17 +94,17 @@ function buyPresidnecyTransaction (payload, playerRef) {
     })
 }
 function comitStockTransaction (state, payload) {
+  console.log('stock comit: ', payload)
   // const player = state.getters.getPlayerByID(payload.player)
-  // const company = state.getters.getCompanyByID(payload.companyID) - old for document model
-  const company = state.activeGame.company[payload.companyID]
+  const company = state.getters.activeGame.companies[payload.companyID]
   // const targetCompany = 'shares.' + payload.company
-  const playerRef = db.collection('games').doc(gameID).collection('players').doc(payload.player)
+  // const playerRef = db.collection('games').doc(gameID).collection('players').doc(payload.player)
   if (payload.action === 'sell') {
-    saleStockTransaction(payload, company, playerRef)
+    saleStockTransaction(payload, company)
   } else if (payload.action === 'buy') {
-    buyStockTransaction(payload, company, playerRef)
+    buyStockTransaction(payload, company)
   } else if (payload.action === 'buyPresedincy') {
-    buyPresidnecyTransaction(payload, playerRef)
+    buyPresidnecyTransaction(payload)
   }
 }
 function presCheck (company) {
@@ -139,22 +124,18 @@ export default new Vuex.Store({
     activeGame: {},
     activeGamePlayers: [],
     activeGameCompanies: [],
-    allGameCompanies: [],
+    allGameCompanies: {},
     navDrawer: true,
-    currentStockActions: {}
+    currentStockActions: {},
+    gameOptions: {}
   },
   getters: {
     games: state => state.games,
+    gameOptions: state => state.activeGame.options,
     gameTemplates: state => state.gameTemplates,
     activeGamePlayers: state => state.activeGame.players,
     activeGame: state => state.activeGame,
     allGameCompanies: state => state.activeGame.companies,
-    // getPlayerByID: (state) => (playerID) => {
-    //   return state.activeGame.players.filter(function (player) { return player.id === playerID })[0]
-    // },
-    getCompanyByID: (state) => (companyID) => {
-      return filter(state.activeGame.companies, { 'company.id': companyID })[0]
-    },
     getCompanyByInitials: (state) => (companyInitials) => {
       return filter(state.activeGame.companies, { 'company.initials': companyInitials })[0]
     },
@@ -172,7 +153,6 @@ export default new Vuex.Store({
     },
     getShareholders: () => (company) => {
       const shareholders = {}
-      // console.log('got to newGetShareholders', company)
       for (const certificate in company.certificates) {
         if (isUndefined(shareholders[company.certificates[certificate].owner])) {
           shareholders[company.certificates[certificate].owner] = company.certificates[certificate].shares
@@ -185,32 +165,18 @@ export default new Vuex.Store({
       return shareholders
     },
     getSharesByPlayerID: (state, getters) => (playerID) => {
-      // console.log('get shares by ID: ', playerID)
-      const playerShares = {}
-      console.log('shares: ', state.activeGame.companies)
-      for (const company in Object.values(state.activeGame.companies)) {
-        // console.log(company.initials, ' : ', getters.getShareholders(company))
+      let playerShares = []
+      Object.values(getters.activeGame.companies).forEach(company => {
         if (!isUndefined(getters.getShareholders(company)[playerID])) {
+          // console.log(company.id, ' : ', getters.getShareholders(company)[playerID])
           playerShares[company.initials] = getters.getShareholders(company)[playerID]
-          // playerShares.push({ company: company.initials, shares: getters.getShareholders(company)[playerID] })
         }
-      }
-      console.log('playerShares: ', playerShares)
-      return playerShares
-    },
-
-    oldGetShareholders: (state) => (company) => {
-      const companyOwners = []
-
-      state.activeGame.players.forEach(player => {
-        Object.entries(player.shares).forEach(share => {
-          if (company === share[0]) {
-            companyOwners.push({ company: company, shares: share[1], player: player.player.id })
-          }
-        })
       })
-      // console.log(companyOwners)
-      return companyOwners
+      if (playerShares === []) {
+        playerShares = false
+      }
+      // console.log('playerShares: ', playerShares)
+      return playerShares
     },
     getPossiblePresidents: (state) => (company) => {
       const companyOwners = []
@@ -223,21 +189,6 @@ export default new Vuex.Store({
         })
       })
       return companyOwners
-    },
-    companiesOwnedByPlayer: (state) => (player) => {
-      if (isEmpty(player.shares)) {
-        return null
-      } else {
-        const ownedCos = []
-        // console.log(Object.entries(player.shares))
-        for (const [ownedCompany, share] of Object.entries(player.shares)) {
-          ownedCos.push({
-            company: filter(state.activeGame.companies, { 'company.initials': ownedCompany })[0],
-            shares: share
-          })
-        }
-        return ownedCos
-      }
     }
   },
   mutations: {
@@ -257,24 +208,10 @@ export default new Vuex.Store({
     bindGameTemplates: firestoreAction(({ bindFirestoreRef }) => {
       return bindFirestoreRef('gameTemplates', db.collection('gameTemplates'))
     }),
-    // bindActiveGamePlayers: firestoreAction(({ bindFirestoreRef }) => {
-    //   return bindFirestoreRef('activeGamePlayers', db.collection('games').doc(gameID).collection('players'))
-    // }),
-    // bindAllGameCompanies: firestoreAction(({ bindFirestoreRef }) => {
-    //   return bindFirestoreRef('allGameCompanies', db.collection('games').doc(gameID)
-    //     .collection('companies').orderBy('operatingOrder'))
-    // }),
     bindActiveGame: firestoreAction(({ bindFirestoreRef }) => {
       const activeGame = bindFirestoreRef('activeGame', db.collection('games').doc(gameID))
       return activeGame
     }),
-    // copyTrainsToGame: async ({ commit }, payload) => {
-    // const gameTemplateRef = await db.collection('gameTemplates').doc('YqavGvZGBpNKtLPDMHZy').get()
-    // const trainRoster = gameTemplateRef.data().trainRoster
-    // console.log(trainRoster)
-    // const curGameRef = db.collection('games').doc(gameID)
-    // curGameRef.update({ trainRoster: trainRoster })
-    // },
     addStockAction: (state, payload) => {
       if (Array.isArray(payload)) {
         payload.forEach(action => comitStockTransaction(state, action))
