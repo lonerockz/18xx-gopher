@@ -25,7 +25,7 @@
 // import store from '../../store/index'
 
 import { mapGetters, mapActions } from 'vuex'
-import { isEmpty, isUndefined } from 'lodash-es'
+import { isUndefined } from 'lodash-es'
 
 export default {
   data () {
@@ -48,20 +48,20 @@ export default {
   },
   created () {
     const _this = this
-    // console.log(this.activeUser.id)
+    console.log('sell stpock', this.activeUser.id)
     const ownedStock = this.getSharesByPlayerID(this.activeUser.id)
     let marketShares = this.getSharesByPlayerID('market')
-    if (isUndefined(marketShares)) {
+    if (!marketShares) {
       marketShares = {}
     }
     console.log('owned stock: ', ownedStock)
-    if (!isEmpty(ownedStock)) {
+    if (ownedStock) {
       const localSaleStocks = []
       console.log(ownedStock)
       for (const [stock, shares] of Object.entries(ownedStock)) {
         console.log('object entries:', stock, shares)
         const activeCompany = _this.getCompanyByInitials(stock)
-        console.log(stock, ' : ', activeCompany.certificates.presidentsCertificate.owner)
+        console.log(stock, ' : ', activeCompany)
         let maxShares = shares + 1
         if (activeCompany.certificates.presidentsCertificate.owner === _this.activeUser.id) {
           console.log('president!!!')
@@ -94,7 +94,7 @@ export default {
     // console.log('local', stockSales)
   },
   computed: {
-    ...mapGetters(['getCompanyByInitials', 'getPossiblePresidents', 'getSharesByPlayerID'])
+    ...mapGetters(['getCompanyByInitials', 'allGameCompanies', 'getPossiblePresidents', 'getSharesByPlayerID'])
 
   }
 }

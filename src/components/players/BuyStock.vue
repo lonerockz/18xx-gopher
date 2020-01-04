@@ -76,19 +76,16 @@ import { isUndefined } from 'lodash-es'
 function playerCanBuy (state, company) {
   let playerCanBuy = false
   const userShares = state.getSharesByPlayerID(state.activeUser.id)
-  console.log('playerCanBuy: ', state.gameOptions.normalShareMaxPercentage)
   if (!userShares) {
     // doesn't own shares so can buy anything that is available
     console.log('Player has no shares')
     playerCanBuy = true
   } else if (isUndefined(userShares[company.initials])) {
     playerCanBuy = true
-    // console.log('Player has no shares in this company')
   } else if (userShares[company.initials] * 10 < state.gameOptions.normalShareMaxPercentage) {
     playerCanBuy = true
-    // console.log('Player less than 6 shares in this company')
   }
-  // console.log('can buy: ', playerCanBuy)
+
   return playerCanBuy
 }
 
@@ -115,7 +112,6 @@ export default {
       let showBuy = false
       if (playerCanBuy(this, company)) {
         const shareholders = this.getShareholders(company)
-        // console.log('buy : ', shareholders)
         if (type === 'par') {
           if ((!isUndefined(shareholders.par)) &&
               (company.parPrice < this.activeUser.currentCash)) {
@@ -131,8 +127,7 @@ export default {
     }
   },
   created () {
-    // console.log('Cos with Prez: ', this.companiesWithPresidents)
-    // console.log('Cos without Prez: ', this.companiesWithoutPresidents)
+
   }
 }
 </script>

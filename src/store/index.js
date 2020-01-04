@@ -4,7 +4,7 @@ import 'firebase/firestore'
 import Vue from 'vue'
 import Vuex from 'vuex'
 import firebaseConfig from '../../firebaseConfig'
-import { isUndefined, filter } from 'lodash-es'
+import { isUndefined, filter, isEmpty } from 'lodash-es'
 const gameID = 'g94p6lxmMNZUZSAI3J1J'
 
 // console.log(firebaseConfig)
@@ -29,28 +29,20 @@ function saleStockTransaction (payload, company) {
   const targetCerts = getTargetShares(company, 'certificate', payload.player)
   const companyUpdate = {}
   for (let i = 0; i < payload.numberOfShares; i++) {
-    companyUpdate['certificates.' + targetCerts[i] + '.owner'] = 'market'
+    companyUpdate['companies.' + payload.companyID + '.certificates.' + targetCerts[i] + '.owner'] = 'market'
   }
   const cashGained = company.stockPrice * payload.numberOfShares
-  console.log(' cash:', cashGained, 'update: ', companyUpdate)
-  // playerRef.update({
-  //   currentCash: firebase.firestore.FieldValue.increment(cashGained)
-  // })
-  //   .then(function () {
-  //     console.log('Player Shares Sold!')
-  //     const companyRef = db.collection('games').doc(gameID).collection('companies').doc(payload.companyID)
-  //     companyRef.update(companyUpdate)
-  //       .then(function () {
-  //         console.log('Company Shares Updated!')
-  //       }).catch(function (error) {
-  //         // The document probably doesn't exist.
-  //         console.error('Error updating Company: ', error)
-  //       })
-  //   })
-  //   .catch(function (error) {
-  //     // The document probably doesn't exist.
-  //     console.error('Error updating Player: ', error)
-  //   })
+  companyUpdate['players.' + payload.player + '.currentCash'] = firebase.firestore.FieldValue.increment(cashGained)
+  console.log('update: ', companyUpdate)
+  const gameRef = db.collection('games').doc(gameID)
+  return gameRef.update(companyUpdate)
+    .then(function () {
+      console.log('Player Shares Sold!')
+    })
+    .catch(function (error) {
+      // The document probably doesn't exist.
+      console.error('Error updating Player: ', error)
+    })
 }
 function buyStockTransaction (payload, company) {
   const targetCert = getTargetShares(company, 'certificate', payload.source)[0]
@@ -137,10 +129,10 @@ export default new Vuex.Store({
     activeGame: state => state.activeGame,
     allGameCompanies: state => state.activeGame.companies,
     getCompanyByInitials: (state) => (companyInitials) => {
-      return filter(state.activeGame.companies, { 'company.initials': companyInitials })[0]
+      return filter(state.activeGame.companies, { initials: companyInitials })[0]
     },
     activeGameCompanies: function (state) {
-      return filter(state.activeGame.companies, { 'company.hasStarted': true })
+      return filter(state.activeGame.companies, { hasStarted: true })
     },
     // inactiveGameCompanies: function (state) {
     //   return state.activeGame.companies.filter(function (company) { return !company.hasStarted })
@@ -165,18 +157,21 @@ export default new Vuex.Store({
       return shareholders
     },
     getSharesByPlayerID: (state, getters) => (playerID) => {
-      let playerShares = []
+      const playerShares = {}
       Object.values(getters.activeGame.companies).forEach(company => {
         if (!isUndefined(getters.getShareholders(company)[playerID])) {
-          // console.log(company.id, ' : ', getters.getShareholders(company)[playerID])
+          console.log(company.id, ' : ', getters.getShareholders(company)[playerID])
           playerShares[company.initials] = getters.getShareholders(company)[playerID]
         }
       })
-      if (playerShares === []) {
-        playerShares = false
-      }
+      console.log('getShares: ', playerShares, isEmpty(playerShares))
+      if (isEmpty(playerShares)) {
+        console.log('empty player shares', playerID)
+        return false
+      } else {
       // console.log('playerShares: ', playerShares)
-      return playerShares
+        return playerShares
+      }
     },
     getPossiblePresidents: (state) => (company) => {
       const companyOwners = []
