@@ -24,7 +24,7 @@
 
         <v-card-text>
           <div
-            v-for="company in companiesWithPresidents"
+            v-for="company in companiesWithPresidentsArray"
             :key="'buy-company'+ company.id"
           >
             <v-row v-if="shouldShowBuyAction(company, 'par')">
@@ -42,7 +42,7 @@
             v-if="(activeUser.currentCash > 134)"
           >
             <v-row
-              v-for="company in companiesWithoutPresidents"
+              v-for="company in companiesWithoutPresidentsArray"
               :key="'start-company'+ company.id"
             >
               <v-btn @click="addStockAction([{'player': activeUser.id, 'action': 'buyPresedincy', 'company': company.initials, 'companyID': company.id, 'source': 'par', 'parPrice': 67}]); dialog = false">
@@ -75,7 +75,7 @@ import { isUndefined } from 'lodash-es'
 
 function playerCanBuy (state, company) {
   let playerCanBuy = false
-  const userShares = state.getSharesByPlayerID(state.activeUser.id)
+  const userShares = state.getSharesByPlayerIDCollection(state.activeUser.id)
   if (!userShares) {
     // doesn't own shares so can buy anything that is available
     console.log('Player has no shares')
@@ -104,14 +104,14 @@ export default {
     }
   },
   computed: {
-    ...mapGetters(['gameOptions', 'getSharesByPlayerID', 'companiesWithoutPresidents', 'companiesWithPresidents', 'getShareholders'])
+    ...mapGetters(['gameOptions', 'getSharesByPlayerIDCollection', 'companiesWithoutPresidentsArray', 'companiesWithPresidentsArray', 'getShareholdersCollection'])
   },
   methods: {
     ...mapActions(['addStockAction']),
     shouldShowBuyAction: function (company, type) {
       let showBuy = false
       if (playerCanBuy(this, company)) {
-        const shareholders = this.getShareholders(company)
+        const shareholders = this.getShareholdersCollection(company)
         if (type === 'par') {
           if ((!isUndefined(shareholders.par)) &&
               (company.parPrice < this.activeUser.currentCash)) {

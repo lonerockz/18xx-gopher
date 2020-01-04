@@ -24,11 +24,11 @@ export default {
     }
   },
   computed: {
-    ...mapGetters(['getShareholders'])
+    ...mapGetters(['getShareholdersCollection'])
   },
   created () {
     console.log('company info')
-    this.getShareholders(this.company)
+    this.getShareholdersCollection(this.company)
   }
 }
 </script>

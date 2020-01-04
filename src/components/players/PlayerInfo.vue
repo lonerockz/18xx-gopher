@@ -11,7 +11,7 @@
           </v-col>
         </v-row>
         <v-row
-          v-for="[company, shares] in Object.entries(getSharesByPlayerID(player.id))"
+          v-for="[company, shares] in Object.entries(getSharesByPlayerIDCollection(player.id))"
           :key="'shares' + player.id + company"
         >
           <v-col
@@ -125,7 +125,7 @@ export default {
     appSellStock: SellStock
   },
   computed: {
-    ...mapGetters(['getSharesByPlayerID'])
+    ...mapGetters(['getSharesByPlayerIDCollection'])
   },
   props: {
 

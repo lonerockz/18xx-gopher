@@ -12,7 +12,7 @@ const gameID = 'g94p6lxmMNZUZSAI3J1J'
 const db = firebase.initializeApp(firebaseConfig).firestore()
 Vue.use(Vuex)
 
-function getTargetShares (company, shareType, ownerID) {
+function getTargetSharesArray (company, shareType, ownerID) {
   // console.log('getCert:', company.certificates)
   const certificates = []
   for (const certificate in company.certificates) {
@@ -21,12 +21,16 @@ function getTargetShares (company, shareType, ownerID) {
       certificates.push(certificate)
     }
   }
-  return certificates
+  if (certificates.lenght === 0) {
+    return false
+  } else {
+    return certificates
+  }
 }
 
 function saleStockTransaction (payload, company) {
   console.log(payload, company)
-  const targetCerts = getTargetShares(company, 'certificate', payload.player)
+  const targetCerts = getTargetSharesArray(company, 'certificate', payload.player)
   const companyUpdate = {}
   for (let i = 0; i < payload.numberOfShares; i++) {
     companyUpdate['companies.' + payload.companyID + '.certificates.' + targetCerts[i] + '.owner'] = 'market'
@@ -45,7 +49,7 @@ function saleStockTransaction (payload, company) {
     })
 }
 function buyStockTransaction (payload, company) {
-  const targetCert = getTargetShares(company, 'certificate', payload.source)[0]
+  const targetCert = getTargetSharesArray(company, 'certificate', payload.source)[0]
   console.log(company)
   let pricePaid = 0
   if (payload.source === 'par') {
@@ -137,13 +141,13 @@ export default new Vuex.Store({
     // inactiveGameCompanies: function (state) {
     //   return state.activeGame.companies.filter(function (company) { return !company.hasStarted })
     // },
-    companiesWithPresidents: function (state) {
+    companiesWithPresidentsArray: function (state) {
       return filter(state.activeGame.companies, function (company) { return presCheck(company) })
     },
-    companiesWithoutPresidents: function (state) {
+    companiesWithoutPresidentsArray: function (state) {
       return filter(state.activeGame.companies, function (company) { return !presCheck(company) })
     },
-    getShareholders: () => (company) => {
+    getShareholdersCollection: () => (company) => {
       const shareholders = {}
       for (const certificate in company.certificates) {
         if (isUndefined(shareholders[company.certificates[certificate].owner])) {
@@ -156,12 +160,12 @@ export default new Vuex.Store({
       // console.log('shareholders : ', company.initials, shareholders)
       return shareholders
     },
-    getSharesByPlayerID: (state, getters) => (playerID) => {
+    getSharesByPlayerIDCollection: (state, getters) => (playerID) => {
       const playerShares = {}
       Object.values(getters.activeGame.companies).forEach(company => {
-        if (!isUndefined(getters.getShareholders(company)[playerID])) {
-          console.log(company.id, ' : ', getters.getShareholders(company)[playerID])
-          playerShares[company.initials] = getters.getShareholders(company)[playerID]
+        if (!isUndefined(getters.getShareholdersCollection(company)[playerID])) {
+          console.log(company.id, ' : ', getters.getShareholdersCollection(company)[playerID])
+          playerShares[company.initials] = getters.getShareholdersCollection(company)[playerID]
         }
       })
       console.log('getShares: ', playerShares, isEmpty(playerShares))
@@ -173,7 +177,7 @@ export default new Vuex.Store({
         return playerShares
       }
     },
-    getPossiblePresidents: (state) => (company) => {
+    getPossiblePresidentsArray: (state) => (company) => {
       const companyOwners = []
       // console.log(company)
       state.activeGame.players.forEach(player => {
@@ -183,7 +187,11 @@ export default new Vuex.Store({
           }
         })
       })
-      return companyOwners
+      if (companyOwners.lenght === 0) {
+        return false
+      } else {
+        return companyOwners
+      }
     }
   },
   mutations: {

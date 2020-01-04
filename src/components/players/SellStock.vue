@@ -1,7 +1,7 @@
 <template>
   <v-card-text>
     {{ activeUser }}
-    <template v-if="getSharesByPlayerID(this.activeUser.id)">
+    <template v-if="getSharesByPlayerIDCollection(this.activeUser.id)">
       <div
         v-for="saleStock in saleStocks"
         :key="'sell-co' + saleStock.company"
@@ -49,8 +49,8 @@ export default {
   created () {
     const _this = this
     console.log('sell stpock', this.activeUser.id)
-    const ownedStock = this.getSharesByPlayerID(this.activeUser.id)
-    let marketShares = this.getSharesByPlayerID('market')
+    const ownedStock = this.getSharesByPlayerIDCollection(this.activeUser.id)
+    let marketShares = this.getSharesByPlayerIDCollection('market')
     if (!marketShares) {
       marketShares = {}
     }
@@ -94,7 +94,7 @@ export default {
     // console.log('local', stockSales)
   },
   computed: {
-    ...mapGetters(['getCompanyByInitials', 'allGameCompanies', 'getPossiblePresidents', 'getSharesByPlayerID'])
+    ...mapGetters(['getCompanyByInitials', 'allGameCompanies', 'getSharesByPlayerIDCollection'])
 
   }
 }
