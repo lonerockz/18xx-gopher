@@ -48,7 +48,7 @@ export default {
   },
   created () {
     const _this = this
-    console.log('sell stpock', this.activeUser.id)
+    console.log('sell stock', this.activeUser.id)
     const ownedStock = this.getSharesByPlayerIDCollection(this.activeUser.id)
     let marketShares = this.getSharesByPlayerIDCollection('market')
     if (!marketShares) {

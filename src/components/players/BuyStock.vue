@@ -39,14 +39,28 @@
             </v-row>
           </div>
           <div
-            v-if="(activeUser.currentCash > 134)"
+            v-if="minParPrice"
           >
-            <v-row
-              v-for="company in companiesWithoutPresidentsArray"
-              :key="'start-company'+ company.id"
-            >
-              <v-btn @click="addStockAction([{'player': activeUser.id, 'action': 'buyPresedincy', 'company': company.initials, 'companyID': company.id, 'source': 'par', 'parPrice': 67}]); dialog = false">
-                presidnecy {{ company.initials }}
+            <v-row>
+              <v-select
+                :items="parPricesObject.prices"
+                v-model="parPricesObject.value"
+                :label="parPricesObject.name"
+              />
+            </v-row>
+            <v-row>
+              <v-select
+                :items="this.companiesWithoutPresidentsArray"
+                item-text="name"
+                item-value="id"
+                v-model="parCompanyObject"
+                label="Choose a Company"
+                return-object
+              />
+            </v-row>
+            <v-row>
+              <v-btn @click="addStockAction({'player': activeUser.id, 'action': 'buyPresedincy', 'company': parCompanyObject.name,'companyID': parCompanyObject.id, 'source': 'par', 'parPrice': parPricesObject.value}); dialog = false">
+                Buy Presediency of <br> {{ parCompanyObject.name }} <br> @ {{ parPricesObject.value }}
               </v-btn>
             </v-row>
           </div>
@@ -89,10 +103,33 @@ function playerCanBuy (state, company) {
   return playerCanBuy
 }
 
+function createParPriceSelectList (state) {
+  let localParPricesObject = {}
+  const pricesArray = []
+  Object.values(state.gameParPricesArray).forEach(parPrice => {
+    if (state.activeUser.currentCash > state.gameOptions.presidentsShareSize * parPrice.price) {
+      pricesArray.push(parPrice.price)
+    }
+  })
+  localParPricesObject = { prices: pricesArray, value: 0, name: 'Select a Par Price' }
+  return localParPricesObject
+}
+
+function createMinParPrice (pricesArray) {
+  if (pricesArray.length > 0) {
+    return Math.min(...pricesArray)
+  } else {
+    return false
+  }
+}
+
 export default {
   data () {
     return {
-      dialog: false
+      parPricesObject: {},
+      dialog: false,
+      minParPrice: false,
+      parCompanyObject: { name: '', id: '' }
     }
   },
   props: {
@@ -104,7 +141,7 @@ export default {
     }
   },
   computed: {
-    ...mapGetters(['gameOptions', 'getSharesByPlayerIDCollection', 'companiesWithoutPresidentsArray', 'companiesWithPresidentsArray', 'getShareholdersCollection'])
+    ...mapGetters(['gameParPricesArray', 'gameOptions', 'getSharesByPlayerIDCollection', 'companiesWithoutPresidentsArray', 'companiesWithPresidentsArray', 'getShareholdersCollection'])
   },
   methods: {
     ...mapActions(['addStockAction']),
@@ -127,7 +164,13 @@ export default {
     }
   },
   created () {
-
+    this.parPricesObject = createParPriceSelectList(this)
+    // const _this = this
+    if (this.parPricesObject) {
+      this.minParPrice = createMinParPrice(this.parPricesObject.prices)
+    }
+    // this.parCompanyObject = createParCompanyList(this.companiesWithoutPresidentsArray)
+    // console.log(this.parCompanyObject)
   }
 }
 </script>

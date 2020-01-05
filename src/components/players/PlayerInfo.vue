@@ -1,9 +1,7 @@
 <template>
   <v-row no-gutters>
     <v-row no-gutters>
-      <v-col
-        cols="8"
-      >
+      <v-col cols="8">
         <v-row>
           <v-col class="text-center headline">
             Cash: ${{ player.currentCash }}
@@ -91,18 +89,6 @@
           </div>
 
           <app-buy-stock :active-user="player" />
-          <v-btn
-            class="my-1"
-            color="light-green"
-          >
-            Sell
-          </v-btn>
-          <v-btn
-            class="my-1"
-            color="light-blue"
-          >
-            Commit
-          </v-btn>
         </div>
       </v-col>
     </v-row>

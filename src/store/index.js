@@ -21,7 +21,7 @@ function getTargetSharesArray (company, shareType, ownerID) {
       certificates.push(certificate)
     }
   }
-  if (certificates.lenght === 0) {
+  if (certificates.length === 0) {
     return false
   } else {
     return certificates
@@ -123,11 +123,13 @@ export default new Vuex.Store({
     allGameCompanies: {},
     navDrawer: true,
     currentStockActions: {},
-    gameOptions: {}
+    gameOptions: {},
+    gameParPricesArray: []
   },
   getters: {
     games: state => state.games,
     gameOptions: state => state.activeGame.options,
+    gameParPricesArray: state => state.activeGame.parPrices,
     gameTemplates: state => state.gameTemplates,
     activeGamePlayers: state => state.activeGame.players,
     activeGame: state => state.activeGame,
@@ -164,13 +166,13 @@ export default new Vuex.Store({
       const playerShares = {}
       Object.values(getters.activeGame.companies).forEach(company => {
         if (!isUndefined(getters.getShareholdersCollection(company)[playerID])) {
-          console.log(company.id, ' : ', getters.getShareholdersCollection(company)[playerID])
+          // console.log(company.id, ' : ', getters.getShareholdersCollection(company)[playerID])
           playerShares[company.initials] = getters.getShareholdersCollection(company)[playerID]
         }
       })
-      console.log('getShares: ', playerShares, isEmpty(playerShares))
+      // console.log('getShares: ', playerShares, isEmpty(playerShares))
       if (isEmpty(playerShares)) {
-        console.log('empty player shares', playerID)
+        // console.log('empty player shares', playerID)
         return false
       } else {
       // console.log('playerShares: ', playerShares)
@@ -187,7 +189,7 @@ export default new Vuex.Store({
           }
         })
       })
-      if (companyOwners.lenght === 0) {
+      if (companyOwners.length === 0) {
         return false
       } else {
         return companyOwners
