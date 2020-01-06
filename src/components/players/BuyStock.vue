@@ -38,6 +38,7 @@
               </v-btn>
             </v-row>
           </div>
+          {{ minParPrice }}
           <div
             v-if="minParPrice"
           >
@@ -106,6 +107,7 @@ function playerCanBuy (state, company) {
 function createParPriceSelectList (state) {
   let localParPricesObject = {}
   const pricesArray = []
+  console.log(state.gameParPricesArray)
   Object.values(state.gameParPricesArray).forEach(parPrice => {
     if (state.activeUser.currentCash > state.gameOptions.presidentsShareSize * parPrice.price) {
       pricesArray.push(parPrice.price)
@@ -116,6 +118,7 @@ function createParPriceSelectList (state) {
 }
 
 function createMinParPrice (pricesArray) {
+  console.log(pricesArray)
   if (pricesArray.length > 0) {
     return Math.min(...pricesArray)
   } else {
@@ -170,7 +173,7 @@ export default {
       this.minParPrice = createMinParPrice(this.parPricesObject.prices)
     }
     // this.parCompanyObject = createParCompanyList(this.companiesWithoutPresidentsArray)
-    // console.log(this.parCompanyObject)
+    console.log(this.companiesWithoutPresidentsArray)
   }
 }
 </script>

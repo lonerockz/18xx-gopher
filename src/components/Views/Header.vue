@@ -9,7 +9,7 @@
       <v-toolbar-title>18xx Gopher</v-toolbar-title>
 
       <v-col class="text-right header font-weight-black">
-        Bank: $8538
+        Bank: ${{ bank }}
       </v-col>
       <v-btn icon>
         <v-icon>mdi-dots-vertical</v-icon>
@@ -67,7 +67,7 @@ export default {
     appCompanyList: CompanyList
   },
   computed: {
-    ...mapGetters(['activeGame'])
+    ...mapGetters(['activeGame', 'bank'])
   },
   methods: {
     // ...mapActions(['bindActiveGame'])

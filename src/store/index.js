@@ -5,7 +5,7 @@ import Vue from 'vue'
 import Vuex from 'vuex'
 import firebaseConfig from '../../firebaseConfig'
 import { isUndefined, filter, isEmpty } from 'lodash-es'
-const gameID = 'g94p6lxmMNZUZSAI3J1J'
+const gameID = 'SF0l06RKrMqfmoORa0gC'
 
 // console.log(firebaseConfig)
 
@@ -27,16 +27,42 @@ function getTargetSharesArray (company, shareType, ownerID) {
     return certificates
   }
 }
+function findTargetStockLocation (maxStockRow, gameStockMarket, stockLocation, numberOfShares) {
+  const newStockLocation = {}
+  let targetRow = String.fromCharCode(stockLocation.row.charCodeAt(0) + numberOfShares)
+  if (targetRow.charCodeAt(0) > maxStockRow.charCodeAt(0)) {
+    targetRow = maxStockRow.charCodeAt(0)
+  }
+  const targetColumn = 'col' + stockLocation.column.toString().padStart(2, '0')
+  do {
+    console.log('row: ', targetRow, 'column', targetColumn)
+    if (isUndefined(gameStockMarket['row' + targetRow][targetColumn].price)) {
+      targetRow = String.fromCharCode(targetRow.charCodeAt(0) - 1)
+    }
+  }
+  while (isUndefined(gameStockMarket['row' + targetRow][targetColumn].price))
+  newStockLocation.price = gameStockMarket['row' + targetRow][targetColumn].price
+  newStockLocation.row = targetRow
+  newStockLocation.column = stockLocation.column
+  console.log('row: ', targetRow, 'column', targetColumn, 'price', newStockLocation)
+  return newStockLocation
+}
 
-function saleStockTransaction (payload, company) {
-  console.log(payload, company)
+function saleStockTransaction (gameOptions, gameStockMarket, payload, company) {
+  console.log(gameStockMarket)
+  console.log('sell stock', payload, company)
+  const newStockLocation = findTargetStockLocation(gameOptions.maxStockRow, gameStockMarket, company.stockLocation, payload.numberOfShares)
   const targetCerts = getTargetSharesArray(company, 'certificate', payload.player)
   const companyUpdate = {}
   for (let i = 0; i < payload.numberOfShares; i++) {
     companyUpdate['companies.' + payload.companyID + '.certificates.' + targetCerts[i] + '.owner'] = 'market'
   }
+  companyUpdate['companies.' + payload.companyID + '.stockPrice'] = newStockLocation.price
+  companyUpdate['companies.' + payload.companyID + '.stockLocation.row'] = newStockLocation.row
+  companyUpdate['companies.' + payload.companyID + '.stockLocation.column'] = newStockLocation.column
   const cashGained = company.stockPrice * payload.numberOfShares
   companyUpdate['players.' + payload.player + '.currentCash'] = firebase.firestore.FieldValue.increment(cashGained)
+  companyUpdate.bank = firebase.firestore.FieldValue.increment(-cashGained)
   console.log('update: ', companyUpdate)
   const gameRef = db.collection('games').doc(gameID)
   return gameRef.update(companyUpdate)
@@ -60,6 +86,7 @@ function buyStockTransaction (payload, company) {
   console.log(targetCert, pricePaid)
   const gameRef = db.collection('games').doc(gameID)
   return gameRef.update({
+    bank: firebase.firestore.FieldValue.increment(pricePaid),
     ['players.' + payload.player + '.currentCash']: firebase.firestore.FieldValue.increment(-pricePaid),
     ['companies.' + payload.companyID + '.certificates.' + targetCert + '.owner']: payload.player
   })
@@ -75,9 +102,11 @@ function buyPresidnecyTransaction (payload) {
   console.log('presidency', payload)
   const pricePaid = payload.parPrice * 2
   return gameRef.update({
+    bank: firebase.firestore.FieldValue.increment(pricePaid),
     ['players.' + payload.player + '.currentCash']: firebase.firestore.FieldValue.increment(-pricePaid),
     ['companies.' + payload.companyID + '.parPrice']: payload.parPrice,
     ['companies.' + payload.companyID + '.stockPrice']: payload.parPrice,
+    ['companies.' + payload.companyID + '.stockLocation']: payload.stockLocation,
     ['companies.' + payload.companyID + '.certificates.presidentsCertificate.owner']: payload.player
   })
     .then(function () {
@@ -89,17 +118,22 @@ function buyPresidnecyTransaction (payload) {
       console.error('Error updating Player: ', error)
     })
 }
+function getParLoc (state, parPrice) {
+  return state.getters.gameParPricesArray.filter(function (parRecord) {
+    return parRecord.price === parPrice
+  })[0].startingLocation
+  //  return state.activeGame.companies.filter(function (company) { return !company.hasStarted })
+}
+
 function comitStockTransaction (state, payload) {
   console.log('stock comit: ', payload)
-  // const player = state.getters.getPlayerByID(payload.player)
   const company = state.getters.activeGame.companies[payload.companyID]
-  // const targetCompany = 'shares.' + payload.company
-  // const playerRef = db.collection('games').doc(gameID).collection('players').doc(payload.player)
   if (payload.action === 'sell') {
-    saleStockTransaction(payload, company)
+    saleStockTransaction(state.getters.gameOptions, state.getters.activeGame.stockMarket, payload, company)
   } else if (payload.action === 'buy') {
     buyStockTransaction(payload, company)
   } else if (payload.action === 'buyPresedincy') {
+    payload.stockLocation = getParLoc(state, payload.parPrice)
     buyPresidnecyTransaction(payload)
   }
 }
@@ -124,11 +158,15 @@ export default new Vuex.Store({
     navDrawer: true,
     currentStockActions: {},
     gameOptions: {},
-    gameParPricesArray: []
+    gameStockMarket: {},
+    gameParPricesArray: [],
+    bank: 0
   },
   getters: {
+    bank: state => state.activeGame.bank,
     games: state => state.games,
     gameOptions: state => state.activeGame.options,
+    gameStockMarket: state => state.activeGame.stockMarket,
     gameParPricesArray: state => state.activeGame.parPrices,
     gameTemplates: state => state.gameTemplates,
     activeGamePlayers: state => state.activeGame.players,
@@ -166,16 +204,12 @@ export default new Vuex.Store({
       const playerShares = {}
       Object.values(getters.activeGame.companies).forEach(company => {
         if (!isUndefined(getters.getShareholdersCollection(company)[playerID])) {
-          // console.log(company.id, ' : ', getters.getShareholdersCollection(company)[playerID])
           playerShares[company.initials] = getters.getShareholdersCollection(company)[playerID]
         }
       })
-      // console.log('getShares: ', playerShares, isEmpty(playerShares))
       if (isEmpty(playerShares)) {
-        // console.log('empty player shares', playerID)
         return false
       } else {
-      // console.log('playerShares: ', playerShares)
         return playerShares
       }
     },
@@ -218,6 +252,7 @@ export default new Vuex.Store({
       return activeGame
     }),
     addStockAction: (state, payload) => {
+      // console.log('state.getters', state.getters)
       if (Array.isArray(payload)) {
         payload.forEach(action => comitStockTransaction(state, action))
       } else {
