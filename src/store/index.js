@@ -27,44 +27,119 @@ function getTargetSharesArray (company, shareType, ownerID) {
     return certificates
   }
 }
-function findTargetStockLocation (maxStockRow, gameStockMarket, stockLocation, numberOfShares) {
-  const newStockLocation = {}
-  let targetRow = String.fromCharCode(stockLocation.row.charCodeAt(0) + numberOfShares)
-  if (targetRow.charCodeAt(0) > maxStockRow.charCodeAt(0)) {
-    targetRow = maxStockRow.charCodeAt(0)
-  }
-  const targetColumn = 'col' + stockLocation.column.toString().padStart(2, '0')
-  do {
-    console.log('row: ', targetRow, 'column', targetColumn)
-    if (isUndefined(gameStockMarket['row' + targetRow][targetColumn].price)) {
-      targetRow = String.fromCharCode(targetRow.charCodeAt(0) - 1)
+function moveStockUp (gameStockMarket, startingLocation) {
+  console.log('up')
+  if (isUndefined(gameStockMarket[startingLocation.row][startingLocation.column].exitUp)) {
+    if (startingLocation.row.toUpperCase() === 'A') {
+      console.log(gameStockMarket[startingLocation.row][startingLocation.column])
+      return startingLocation
+    } else {
+      return {
+        row: (String.fromCharCode(startingLocation.row.toUpperCase().charCodeAt(0) - 1)),
+        column: startingLocation.column
+      }
     }
+  } else {
+    return moveStock(gameStockMarket, startingLocation, gameStockMarket[startingLocation.row][startingLocation.column].exitUp.toLowerCase())
   }
-  while (isUndefined(gameStockMarket['row' + targetRow][targetColumn].price))
-  newStockLocation.price = gameStockMarket['row' + targetRow][targetColumn].price
-  newStockLocation.row = targetRow
-  newStockLocation.column = stockLocation.column
-  console.log('row: ', targetRow, 'column', targetColumn, 'price', newStockLocation)
-  return newStockLocation
+}
+
+function moveStockLeft (gameStockMarket, startingLocation) {
+  console.log('left')
+  if (isUndefined(gameStockMarket[startingLocation.row][startingLocation.column].exitLeft)) {
+    if (startingLocation.column === 1) {
+      console.log(gameStockMarket[startingLocation.row][startingLocation.column])
+      return startingLocation
+    } else {
+      return {
+        row: (startingLocation.row - 1),
+        column: startingLocation.column
+      }
+    }
+  } else {
+    return moveStock(gameStockMarket, startingLocation, gameStockMarket[startingLocation.row][startingLocation.column].exitLeft.toLowerCase())
+  }
+}
+function moveStockRight (gameStockMarket, startingLocation) {
+  console.log('right')
+  if (isUndefined(gameStockMarket[startingLocation.row][startingLocation.column].exitLeft)) {
+    if (startingLocation.column === gameStockMarket.maxColumn) {
+      console.log(gameStockMarket[startingLocation.row][startingLocation.column])
+      return startingLocation
+    } else {
+      return {
+        row: (startingLocation.row + 1),
+        column: startingLocation.column
+      }
+    }
+  } else {
+    return moveStock(gameStockMarket, startingLocation, gameStockMarket[startingLocation.row][startingLocation.column].exitLeft.toLowerCase())
+  }
+}
+
+function moveStockDown (gameStockMarket, startingLocation) {
+  console.log('down')
+  if (isUndefined(gameStockMarket[startingLocation.row][startingLocation.column].exitDown)) {
+    if (startingLocation.row.toUpperCase() === gameStockMarket.maxRow.toUpperCase()) {
+      console.log(gameStockMarket[startingLocation.row][startingLocation.column])
+      return startingLocation
+    } else {
+      return {
+        row: (String.fromCharCode(startingLocation.row.toUpperCase().charCodeAt(0) + 1)),
+        column: startingLocation.column
+      }
+    }
+  } else {
+    return moveStock(gameStockMarket, startingLocation, gameStockMarket[startingLocation.row][startingLocation.column].exitDown.toLowerCase())
+  }
+}
+function moveStock (gameStockMarket, startingLocation, direction) {
+  if (!isUndefined(gameStockMarket[startingLocation.row][startingLocation.column])) {
+    console.log('move stock:', gameStockMarket[startingLocation.row][startingLocation.column])
+    switch (direction.toLowerCase()) {
+      case 'stop':
+        console.log('stop')
+        return startingLocation
+      case 'right':
+        return moveStockRight(gameStockMarket, startingLocation)
+      case 'up':
+        return moveStockUp(gameStockMarket, startingLocation)
+      case 'down':
+        return moveStockDown(gameStockMarket, startingLocation)
+      case 'left':
+        return moveStockLeft(gameStockMarket, startingLocation)
+      default:
+        console.error('Default', direction)
+        return false
+    }
+  } else {
+    console.error('The current location is invalid', startingLocation)
+    return false
+  }
 }
 
 function saleStockTransaction (gameOptions, gameStockMarket, payload, company) {
   console.log(gameStockMarket)
   console.log('sell stock', payload, company)
-  const newStockLocation = findTargetStockLocation(gameOptions.maxStockRow, gameStockMarket, company.stockLocation, payload.numberOfShares)
-  const targetCerts = getTargetSharesArray(company, 'certificate', payload.player)
+  let newStockLocation = company.stockLocation
+  const gameRef = db.collection('games').doc(gameID)
+  const companyPath = 'companies.' + payload.companyID + '.'
   const companyUpdate = {}
-  for (let i = 0; i < payload.numberOfShares; i++) {
-    companyUpdate['companies.' + payload.companyID + '.certificates.' + targetCerts[i] + '.owner'] = 'market'
-  }
-  companyUpdate['companies.' + payload.companyID + '.stockPrice'] = newStockLocation.price
-  companyUpdate['companies.' + payload.companyID + '.stockLocation.row'] = newStockLocation.row
-  companyUpdate['companies.' + payload.companyID + '.stockLocation.column'] = newStockLocation.column
   const cashGained = company.stockPrice * payload.numberOfShares
+  const targetCerts = getTargetSharesArray(company, 'certificate', payload.player)
+  for (let i = 0; i < payload.numberOfShares; i++) {
+    newStockLocation = moveStock(gameStockMarket, newStockLocation, 'down')
+  }
+  console.log('new location:', newStockLocation)
+  for (let i = 0; i < payload.numberOfShares; i++) {
+    companyUpdate[companyPath + 'certificates.' + targetCerts[i] + '.owner'] = 'market'
+  }
+  companyUpdate[companyPath + 'stockPrice'] = gameStockMarket[newStockLocation.row][newStockLocation.column].price
+  companyUpdate[companyPath + 'stockLocation.row'] = newStockLocation.row
+  companyUpdate[companyPath + 'stockLocation.column'] = newStockLocation.column
   companyUpdate['players.' + payload.player + '.currentCash'] = firebase.firestore.FieldValue.increment(cashGained)
   companyUpdate.bank = firebase.firestore.FieldValue.increment(-cashGained)
   console.log('update: ', companyUpdate)
-  const gameRef = db.collection('games').doc(gameID)
   return gameRef.update(companyUpdate)
     .then(function () {
       console.log('Player Shares Sold!')
@@ -76,7 +151,6 @@ function saleStockTransaction (gameOptions, gameStockMarket, payload, company) {
 }
 function buyStockTransaction (payload, company) {
   const targetCert = getTargetSharesArray(company, 'certificate', payload.source)[0]
-  console.log(company)
   let pricePaid = 0
   if (payload.source === 'par') {
     pricePaid = company.parPrice
