@@ -48,26 +48,26 @@ export default {
   },
   created () {
     const _this = this
-    console.log('sell stock', this.activeUser.id)
+    // console.log('sell stock', this.activeUser.id)
     const ownedStock = this.getSharesByPlayerIDCollection(this.activeUser.id)
     let marketShares = this.getSharesByPlayerIDCollection('market')
     if (!marketShares) {
       marketShares = {}
     }
-    console.log('owned stock: ', ownedStock)
+    // console.log('owned stock: ', ownedStock)
     if (ownedStock) {
       const localSaleStocks = []
-      console.log(ownedStock)
+      // console.log(ownedStock)
       for (const [stock, shares] of Object.entries(ownedStock)) {
-        console.log('object entries:', stock, shares)
+        // console.log('object entries:', stock, shares)
         const activeCompany = _this.getCompanyByInitials(stock)
-        console.log(stock, ' : ', activeCompany)
+        // console.log(stock, ' : ', activeCompany)
         let maxShares = shares + 1
         if (activeCompany.certificates.presidentsCertificate.owner === _this.activeUser.id) {
-          console.log('president!!!')
+          // console.log('president!!!')
           maxShares -= 2
         }
-        console.log(localSaleStocks, maxShares)
+        // console.log(localSaleStocks, maxShares)
         if (!isUndefined(marketShares[stock])) {
           maxShares = Math.min(6 - marketShares[stock], maxShares)
         }

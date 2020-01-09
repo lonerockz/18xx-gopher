@@ -4,7 +4,8 @@ import 'firebase/firestore'
 import Vue from 'vue'
 import Vuex from 'vuex'
 import firebaseConfig from '../../firebaseConfig'
-import { isUndefined, filter, isEmpty } from 'lodash-es'
+import { isUndefined, filter, isEmpty, orderBy } from 'lodash-es'
+import { moveStock, presidencyCheck } from './stock'
 const gameID = 'SF0l06RKrMqfmoORa0gC'
 
 // console.log(firebaseConfig)
@@ -27,102 +28,16 @@ function getTargetSharesArray (company, shareType, ownerID) {
     return certificates
   }
 }
-function moveStockUp (gameStockMarket, startingLocation) {
-  console.log('up')
-  if (isUndefined(gameStockMarket[startingLocation.row][startingLocation.column].exitUp)) {
-    if (startingLocation.row.toUpperCase() === 'A') {
-      console.log(gameStockMarket[startingLocation.row][startingLocation.column])
-      return startingLocation
-    } else {
-      return {
-        row: (String.fromCharCode(startingLocation.row.toUpperCase().charCodeAt(0) - 1)),
-        column: startingLocation.column
-      }
-    }
-  } else {
-    return moveStock(gameStockMarket, startingLocation, gameStockMarket[startingLocation.row][startingLocation.column].exitUp.toLowerCase())
-  }
-}
 
-function moveStockLeft (gameStockMarket, startingLocation) {
-  console.log('left')
-  if (isUndefined(gameStockMarket[startingLocation.row][startingLocation.column].exitLeft)) {
-    if (startingLocation.column === 1) {
-      console.log(gameStockMarket[startingLocation.row][startingLocation.column])
-      return startingLocation
-    } else {
-      return {
-        row: (startingLocation.row - 1),
-        column: startingLocation.column
-      }
-    }
-  } else {
-    return moveStock(gameStockMarket, startingLocation, gameStockMarket[startingLocation.row][startingLocation.column].exitLeft.toLowerCase())
+function saleStockTransaction (state, payload, company) {
+  const gameStockMarket = state.getters.activeGame.stockMarket
+  const newPresident = presidencyCheck(state, company, payload)
+  if (newPresident) {
+    console.log('New Predient is: ', newPresident)
   }
-}
-function moveStockRight (gameStockMarket, startingLocation) {
-  console.log('right')
-  if (isUndefined(gameStockMarket[startingLocation.row][startingLocation.column].exitLeft)) {
-    if (startingLocation.column === gameStockMarket.maxColumn) {
-      console.log(gameStockMarket[startingLocation.row][startingLocation.column])
-      return startingLocation
-    } else {
-      return {
-        row: (startingLocation.row + 1),
-        column: startingLocation.column
-      }
-    }
-  } else {
-    return moveStock(gameStockMarket, startingLocation, gameStockMarket[startingLocation.row][startingLocation.column].exitLeft.toLowerCase())
-  }
-}
-
-function moveStockDown (gameStockMarket, startingLocation) {
-  console.log('down')
-  if (isUndefined(gameStockMarket[startingLocation.row][startingLocation.column].exitDown)) {
-    if (startingLocation.row.toUpperCase() === gameStockMarket.maxRow.toUpperCase()) {
-      console.log(gameStockMarket[startingLocation.row][startingLocation.column])
-      return startingLocation
-    } else {
-      return {
-        row: (String.fromCharCode(startingLocation.row.toUpperCase().charCodeAt(0) + 1)),
-        column: startingLocation.column
-      }
-    }
-  } else {
-    return moveStock(gameStockMarket, startingLocation, gameStockMarket[startingLocation.row][startingLocation.column].exitDown.toLowerCase())
-  }
-}
-function moveStock (gameStockMarket, startingLocation, direction) {
-  if (!isUndefined(gameStockMarket[startingLocation.row][startingLocation.column])) {
-    console.log('move stock:', gameStockMarket[startingLocation.row][startingLocation.column])
-    switch (direction.toLowerCase()) {
-      case 'stop':
-        console.log('stop')
-        return startingLocation
-      case 'right':
-        return moveStockRight(gameStockMarket, startingLocation)
-      case 'up':
-        return moveStockUp(gameStockMarket, startingLocation)
-      case 'down':
-        return moveStockDown(gameStockMarket, startingLocation)
-      case 'left':
-        return moveStockLeft(gameStockMarket, startingLocation)
-      default:
-        console.error('Default', direction)
-        return false
-    }
-  } else {
-    console.error('The current location is invalid', startingLocation)
-    return false
-  }
-}
-
-function saleStockTransaction (gameOptions, gameStockMarket, payload, company) {
-  console.log(gameStockMarket)
-  console.log('sell stock', payload, company)
+  // console.log(gameStockMarket)
+  // console.log('sell stock', payload, company)
   let newStockLocation = company.stockLocation
-  const gameRef = db.collection('games').doc(gameID)
   const companyPath = 'companies.' + payload.companyID + '.'
   const companyUpdate = {}
   const cashGained = company.stockPrice * payload.numberOfShares
@@ -130,7 +45,7 @@ function saleStockTransaction (gameOptions, gameStockMarket, payload, company) {
   for (let i = 0; i < payload.numberOfShares; i++) {
     newStockLocation = moveStock(gameStockMarket, newStockLocation, 'down')
   }
-  console.log('new location:', newStockLocation)
+  // console.log('new location:', newStockLocation)
   for (let i = 0; i < payload.numberOfShares; i++) {
     companyUpdate[companyPath + 'certificates.' + targetCerts[i] + '.owner'] = 'market'
   }
@@ -139,31 +54,63 @@ function saleStockTransaction (gameOptions, gameStockMarket, payload, company) {
   companyUpdate[companyPath + 'stockLocation.column'] = newStockLocation.column
   companyUpdate['players.' + payload.player + '.currentCash'] = firebase.firestore.FieldValue.increment(cashGained)
   companyUpdate.bank = firebase.firestore.FieldValue.increment(-cashGained)
-  console.log('update: ', companyUpdate)
-  return gameRef.update(companyUpdate)
-    .then(function () {
-      console.log('Player Shares Sold!')
-    })
-    .catch(function (error) {
-      // The document probably doesn't exist.
-      console.error('Error updating Player: ', error)
-    })
+  // console.log('update: ', companyUpdate)
+  // const gameRef = db.collection('games').doc(gameID)
+  // return gameRef.update(companyUpdate)
+  //   .then(function () {
+  //     console.log('Player Shares Sold!')
+  //   })
+  //   .catch(function (error) {
+  //     // The document probably doesn't exist.
+  //     console.error('Error updating Player: ', error)
+  //   })
 }
-function buyStockTransaction (payload, company) {
-  const targetCert = getTargetSharesArray(company, 'certificate', payload.source)[0]
+function buyStockTransaction (state, payload, company) {
+  const companyUpdate = {}
   let pricePaid = 0
   if (payload.source === 'par') {
     pricePaid = company.parPrice
   } else if (payload.source === 'market') {
     pricePaid = company.stockPrice
   }
-  console.log(targetCert, pricePaid)
+  const sharesToBuy = isUndefined(payload.numberOfShares) ? 1 : payload.numberOfShares
+  pricePaid = sharesToBuy * pricePaid
+  companyUpdate.bank = firebase.firestore.FieldValue.increment(pricePaid)
+  companyUpdate['players.' + payload.player + '.currentCash'] = firebase.firestore.FieldValue.increment(-pricePaid)
+  const companyPath = 'companies.' + payload.companyID + '.'
+  const marketCerts = getTargetSharesArray(company, 'certificate', payload.source)
+  const newPresident = presidencyCheck(state, company, payload)
+  if (newPresident) {
+    companyUpdate[companyPath + 'certificates.presidentsCertificate.owner'] = payload.player
+    const oldPresident = company.certificates.presidentsCertificate.owner
+    const presidentsShareSize = company.certificates.presidentsCertificate.shares
+    const oldPresidentsSharesFromCompany = presidentsShareSize - sharesToBuy
+    const oldPresidentsSharesFromMarket = presidentsShareSize - oldPresidentsSharesFromCompany
+    const newPresidentSharesFromMarket = sharesToBuy - presidentsShareSize
+    const targetCerts = getTargetSharesArray(company, 'certificate', payload.player)
+    if (oldPresidentsSharesFromCompany > 0) {
+      for (let i = 0; i < oldPresidentsSharesFromCompany; i++) {
+        companyUpdate[companyPath + 'certificates.' + targetCerts[i] + '.owner'] = oldPresident
+      }
+    }
+    if (oldPresidentsSharesFromMarket > 0) {
+      for (let i = 0; i < oldPresidentsSharesFromMarket; i++) {
+        companyUpdate[companyPath + 'certificates.' + marketCerts[i] + '.owner'] = oldPresident
+      }
+    }
+    if (newPresidentSharesFromMarket > 0) {
+      for (let i = 0; i < newPresidentSharesFromMarket; i++) {
+        companyUpdate[companyPath + 'certificates.' + marketCerts[i + oldPresidentsSharesFromMarket] + '.owner'] = oldPresident
+      }
+    }
+  } else {
+    for (let i = 0; i < sharesToBuy; i++) {
+      companyUpdate['companies.' + payload.companyID + '.certificates.' + marketCerts[0] + '.owner'] = payload.player
+    }
+  }
+  console.log(companyUpdate)
   const gameRef = db.collection('games').doc(gameID)
-  return gameRef.update({
-    bank: firebase.firestore.FieldValue.increment(pricePaid),
-    ['players.' + payload.player + '.currentCash']: firebase.firestore.FieldValue.increment(-pricePaid),
-    ['companies.' + payload.companyID + '.certificates.' + targetCert + '.owner']: payload.player
-  })
+  return gameRef.update(companyUpdate)
     .then(function () {
       console.log('Company Shares Updated!')
     }).catch(function (error) {
@@ -173,7 +120,7 @@ function buyStockTransaction (payload, company) {
 }
 function buyPresidnecyTransaction (payload) {
   const gameRef = db.collection('games').doc(gameID)
-  console.log('presidency', payload)
+  // console.log('presidency', payload)
   const pricePaid = payload.parPrice * 2
   return gameRef.update({
     bank: firebase.firestore.FieldValue.increment(pricePaid),
@@ -203,14 +150,15 @@ function comitStockTransaction (state, payload) {
   console.log('stock comit: ', payload)
   const company = state.getters.activeGame.companies[payload.companyID]
   if (payload.action === 'sell') {
-    saleStockTransaction(state.getters.gameOptions, state.getters.activeGame.stockMarket, payload, company)
+    saleStockTransaction(state, payload, company)
   } else if (payload.action === 'buy') {
-    buyStockTransaction(payload, company)
+    buyStockTransaction(state, payload, company)
   } else if (payload.action === 'buyPresedincy') {
     payload.stockLocation = getParLoc(state, payload.parPrice)
     buyPresidnecyTransaction(payload)
   }
 }
+
 function presCheck (company) {
   // console.log('prez check: ', company)
   if ((company.certificates.presidentsCertificate.owner === 'par') ||
@@ -260,6 +208,22 @@ export default new Vuex.Store({
     },
     companiesWithoutPresidentsArray: function (state) {
       return filter(state.activeGame.companies, function (company) { return !presCheck(company) })
+    },
+    getPlayerShareholdersArray: (state, getters) => (company) => {
+      let shareHolders = []
+      const nonPlayerOwners = ['par', 'market', 'company']
+      const allShareHolders = getters.getShareholdersCollection(company)
+      Object.keys(allShareHolders).forEach(shareHolder => {
+        if (!nonPlayerOwners.includes(shareHolder.toLowerCase())) {
+          shareHolders.push({
+            shareHolder: shareHolder,
+            shares: allShareHolders[shareHolder],
+            shareHolderPriority: state.activeGame.players[shareHolder].priorityOrder
+          })
+        }
+      })
+      shareHolders = orderBy(shareHolders, ['shares', 'shareHolderPriority'], ['desc', 'asc'])
+      return shareHolders
     },
     getShareholdersCollection: () => (company) => {
       const shareholders = {}
