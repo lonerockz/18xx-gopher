@@ -30,40 +30,58 @@ function getTargetSharesArray (company, shareType, ownerID) {
 }
 
 function saleStockTransaction (state, payload, company) {
-  const gameStockMarket = state.getters.activeGame.stockMarket
-  const newPresident = presidencyCheck(state, company, payload)
-  if (newPresident) {
-    console.log('New Predient is: ', newPresident)
-  }
   // console.log(gameStockMarket)
   // console.log('sell stock', payload, company)
   let newStockLocation = company.stockLocation
   const companyPath = 'companies.' + payload.companyID + '.'
   const companyUpdate = {}
   const cashGained = company.stockPrice * payload.numberOfShares
-  const targetCerts = getTargetSharesArray(company, 'certificate', payload.player)
+  const gameStockMarket = state.getters.activeGame.stockMarket
+  const newPresident = presidencyCheck(state, company, payload)
+  const PlayerCerts = getTargetSharesArray(company, 'certificate', payload.player)
+  if (newPresident) {
+    console.log('New Presidient is: ', newPresident)
+    console.log('certificates: ', company.certificates)
+    companyUpdate[companyPath + 'certificates.presidentsCertificate.owner'] = newPresident
+    const newPresidentsCerts = getTargetSharesArray(company, 'certificate', newPresident)
+    const sharesToChange = Math.max(payload.numberOfShares, company.certificates.presidentsCertificate.shares)
+    for (let i = 0; i < sharesToChange; i++) {
+      if (i < company.certificates.presidentsCertificate.shares) {
+        console.log(i)
+        if (i < payload.numberOfShares) {
+          companyUpdate[companyPath + 'certificates.' + newPresidentsCerts[i] + '.owner'] = 'market'
+        } else {
+          companyUpdate[companyPath + 'certificates.' + newPresidentsCerts[i] + '.owner'] = payload.player
+        }
+      } else {
+        const targetCert = i - company.certificates.presidentsCertificate.shares
+        companyUpdate[companyPath + 'certificates.' + PlayerCerts[targetCert] + '.owner'] = 'market'
+      }
+    }
+  } else {
+    for (let i = 0; i < payload.numberOfShares; i++) {
+      companyUpdate[companyPath + 'certificates.' + PlayerCerts[i] + '.owner'] = 'market'
+    }
+  }
   for (let i = 0; i < payload.numberOfShares; i++) {
     newStockLocation = moveStock(gameStockMarket, newStockLocation, 'down')
   }
   // console.log('new location:', newStockLocation)
-  for (let i = 0; i < payload.numberOfShares; i++) {
-    companyUpdate[companyPath + 'certificates.' + targetCerts[i] + '.owner'] = 'market'
-  }
   companyUpdate[companyPath + 'stockPrice'] = gameStockMarket[newStockLocation.row][newStockLocation.column].price
   companyUpdate[companyPath + 'stockLocation.row'] = newStockLocation.row
   companyUpdate[companyPath + 'stockLocation.column'] = newStockLocation.column
   companyUpdate['players.' + payload.player + '.currentCash'] = firebase.firestore.FieldValue.increment(cashGained)
   companyUpdate.bank = firebase.firestore.FieldValue.increment(-cashGained)
-  // console.log('update: ', companyUpdate)
-  // const gameRef = db.collection('games').doc(gameID)
-  // return gameRef.update(companyUpdate)
-  //   .then(function () {
-  //     console.log('Player Shares Sold!')
-  //   })
-  //   .catch(function (error) {
-  //     // The document probably doesn't exist.
-  //     console.error('Error updating Player: ', error)
-  //   })
+  console.log('update: ', companyUpdate)
+  const gameRef = db.collection('games').doc(gameID)
+  return gameRef.update(companyUpdate)
+    .then(function () {
+      console.log('Player Shares Sold!')
+    })
+    .catch(function (error) {
+      // The document probably doesn't exist.
+      console.error('Error updating Player: ', error)
+    })
 }
 function buyStockTransaction (state, payload, company) {
   const companyUpdate = {}
